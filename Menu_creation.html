@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu Intelligence Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --burgundy:#6E1423;
+  --burgundy-light:#8C1F32;
+  --gold:#C9973B;
+  --gold-light:#E4C077;
+  --forest:#2F5D4A;
+  --forest-light:#3F7A62;
+  --ivory:#FBF7EF;
+  --card:#FFFFFF;
+  --text:#2B2926;
+  --text-soft:#6B6560;
+  --border:#E9E2D4;
+  --shadow: 0 10px 30px rgba(110,20,35,0.08);
+  --shadow-lg: 0 20px 50px rgba(110,20,35,0.14);
+  --radius: 18px;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--ivory);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:'Poppins',sans-serif; margin:0; color:var(--burgundy);}
+h1{font-weight:800;}
+h2{font-weight:800;}
+h3,h4{font-weight:600;}
+.mono, .stat-value, .kpi-value{font-family:'IBM Plex Mono',monospace;}
+a{color:inherit;}
+.container{max-width:1180px; margin:0 auto; padding:0 32px;}
+::selection{background:var(--gold-light);}
+
+/* ---------- NAV ---------- */
+.navbar{
+  position:sticky; top:0; z-index:500;
+  background:rgba(251,247,239,0.92);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+  transition:box-shadow .3s;
+}
+.navbar.scrolled{box-shadow:0 4px 18px rgba(0,0,0,0.06);}
+.nav-inner{
+  max-width:1180px; margin:0 auto; padding:14px 32px;
+  display:flex; align-items:center; justify-content:space-between; gap:24px;
+}
+.nav-brand{font-family:'Poppins',sans-serif; font-weight:800; color:var(--burgundy); font-size:15px; letter-spacing:.3px; white-space:nowrap;}
+.nav-brand span{color:var(--gold); font-weight:700;}
+.nav-links{display:flex; gap:2px; overflow-x:auto; scrollbar-width:none;}
+.nav-links::-webkit-scrollbar{display:none;}
+.nav-links a{
+  font-size:12.5px; font-weight:600; color:var(--text-soft); text-decoration:none;
+  padding:8px 12px; border-radius:20px; white-space:nowrap; transition:.2s;
+}
+.nav-links a:hover, .nav-links a.active{background:var(--burgundy); color:#fff;}
+
+/* ---------- HERO / COVER ---------- */
+.hero{
+  position:relative; overflow:hidden;
+  background:linear-gradient(160deg,var(--burgundy) 0%, #4E0F1B 55%, #33101A 100%);
+  color:#fff; padding:120px 32px 90px;
+}
+.hero::before{
+  content:''; position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(201,151,59,0.25), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(47,93,74,0.35), transparent 50%);
+}
+.hero-inner{position:relative; max-width:1180px; margin:0 auto;}
+.hero-eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:1.5px;
+  color:var(--gold-light); text-transform:uppercase; margin-bottom:22px;
+  border:1px solid rgba(228,192,119,0.4); padding:7px 16px; border-radius:30px;
+}
+.hero-eyebrow .dot{width:7px; height:7px; border-radius:50%; background:var(--gold-light); box-shadow:0 0 0 4px rgba(228,192,119,0.2);}
+.hero h1{
+  color:#fff; font-size:clamp(34px,5.4vw,62px); line-height:1.08; max-width:850px;
+  margin-bottom:20px; letter-spacing:-0.5px;
+}
+.hero h1 em{font-style:normal; color:var(--gold-light);}
+.hero p.lead{font-size:18px; color:rgba(255,255,255,0.82); max-width:640px; font-weight:400;}
+.hero-meta{
+  display:flex; flex-wrap:wrap; gap:14px; margin-top:44px;
+}
+.hero-meta .chip{
+  background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.16);
+  border-radius:14px; padding:14px 20px; min-width:150px;
+}
+.hero-meta .chip .label{font-size:11px; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.55); margin-bottom:6px;}
+.hero-meta .chip .value{font-family:'IBM Plex Mono',monospace; font-size:19px; font-weight:600; color:#fff;}
+
+/* ---------- SECTION SCAFFOLD ---------- */
+.section{padding:90px 0;}
+.section.alt{background:#fff; border-top:1px solid var(--border); border-bottom:1px solid var(--border);}
+.section-head{max-width:720px; margin-bottom:52px;}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:1.6px; text-transform:uppercase;
+  color:var(--forest); font-weight:600; margin-bottom:14px; display:block;
+}
+.section h2{font-size:clamp(26px,3.4vw,38px); margin-bottom:14px; letter-spacing:-0.3px;}
+.section-head p{color:var(--text-soft); font-size:16px; max-width:640px;}
+
+/* ---------- CARDS ---------- */
+.grid{display:grid; gap:22px;}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+@media (max-width:900px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr 1fr;}}
+@media (max-width:620px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+.card{
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:26px; box-shadow:var(--shadow); transition:transform .25s, box-shadow .25s;
+}
+.card:hover{transform:translateY(-3px); box-shadow:var(--shadow-lg);}
+
+/* stat card (ZIP intelligence) */
+.stat-card{position:relative; cursor:pointer;}
+.stat-card .info-btn{
+  position:absolute; top:20px; right:20px; width:24px; height:24px; border-radius:50%;
+  border:1px solid var(--border); background:var(--ivory); color:var(--text-soft);
+  font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center;
+  font-family:'IBM Plex Mono',monospace;
+}
+.stat-card .stat-label{font-size:12.5px; text-transform:uppercase; letter-spacing:.8px; color:var(--text-soft); font-weight:600; margin-bottom:10px;}
+.stat-card .stat-value{font-size:28px; font-weight:600; color:var(--burgundy); margin-bottom:6px;}
+.stat-card .stat-sub{font-size:13px; color:var(--text-soft);}
+
+/* KPI cards */
+.kpi-card{
+  text-align:left; border-top:4px solid var(--gold); position:relative; cursor:pointer;
+}
+.kpi-card.forest{border-top-color:var(--forest);}
+.kpi-card.burgundy{border-top-color:var(--burgundy);}
+.kpi-card .kpi-label{font-size:12px; text-transform:uppercase; letter-spacing:.8px; color:var(--text-soft); font-weight:600; margin-bottom:12px;}
+.kpi-card .kpi-value{font-size:30px; font-weight:600; color:var(--burgundy); line-height:1;}
+.kpi-card .kpi-value small{font-size:14px; font-family:'Inter',sans-serif; color:var(--text-soft); font-weight:500;}
+.kpi-card .kpi-tag{
+  display:inline-block; margin-top:12px; font-size:11px; padding:4px 10px; border-radius:20px;
+  background:rgba(47,93,74,0.1); color:var(--forest); font-weight:600; letter-spacing:.3px;
+}
+.kpi-card .kpi-tag.warn{background:rgba(110,20,35,0.08); color:var(--burgundy);}
+.kpi-card .kpi-tag.neutral{background:rgba(201,151,59,0.14); color:#8a651f;}
+
+/* callouts */
+.callout{
+  border-radius:16px; padding:22px 26px; border:1px solid var(--border); background:#fff;
+  display:flex; gap:16px; align-items:flex-start;
+}
+.callout .icon{
+  flex-shrink:0; width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-family:'Poppins',sans-serif; color:#fff; font-size:15px;
+}
+.callout.gold .icon{background:var(--gold);}
+.callout.forest .icon{background:var(--forest);}
+.callout.burgundy .icon{background:var(--burgundy);}
+.callout h4{margin-bottom:6px; font-size:15px;}
+.callout p{margin:0; font-size:14.5px; color:var(--text-soft);}
+
+/* pill badges */
+.badge{display:inline-block; font-size:11.5px; font-weight:600; padding:4px 11px; border-radius:20px; letter-spacing:.2px;}
+.badge.family{background:rgba(47,93,74,0.12); color:var(--forest);}
+.badge.premium{background:rgba(201,151,59,0.18); color:#8a651f;}
+.badge.edge{background:rgba(110,20,35,0.1); color:var(--burgundy);}
+
+/* ---------- METHODOLOGY TIMELINE ---------- */
+.timeline{display:flex; flex-direction:column; gap:0; position:relative; margin-top:10px;}
+.tl-step{display:flex; gap:24px; padding:22px 0; position:relative;}
+.tl-step:not(:last-child)::before{
+  content:''; position:absolute; left:23px; top:56px; bottom:-6px; width:2px;
+  background:repeating-linear-gradient(to bottom, var(--gold) 0 6px, transparent 6px 12px);
+}
+.tl-num{
+  flex-shrink:0; width:48px; height:48px; border-radius:50%; background:var(--burgundy); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:15px;
+  box-shadow:var(--shadow); z-index:1;
+}
+.tl-body h4{font-size:16.5px; margin-bottom:6px;}
+.tl-body p{margin:0; color:var(--text-soft); font-size:14.5px; max-width:620px;}
+.tl-body .tl-figures{margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;}
+.tl-body .tl-figures span{
+  font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--ivory); border:1px solid var(--border);
+  padding:4px 10px; border-radius:8px; color:var(--burgundy); font-weight:600;
+}
+
+/* ---------- SEGMENTATION ---------- */
+.seg-wrap{display:grid; grid-template-columns:340px 1fr; gap:40px; align-items:center;}
+@media (max-width:900px){.seg-wrap{grid-template-columns:1fr;}}
+.donut-wrap{display:flex; justify-content:center;}
+.seg-legend{display:flex; flex-direction:column; gap:14px;}
+.seg-row{
+  display:flex; align-items:center; gap:14px; padding:14px 16px; border:1px solid var(--border);
+  border-radius:14px; cursor:pointer; background:#fff; transition:.2s;
+}
+.seg-row:hover{border-color:var(--gold); background:#fffdf7;}
+.seg-swatch{width:14px; height:14px; border-radius:4px; flex-shrink:0;}
+.seg-row .seg-name{font-weight:600; font-size:14.5px; flex:1;}
+.seg-row .seg-pct{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:17px; color:var(--burgundy);}
+.seg-row .info-dot{
+  width:20px; height:20px; border-radius:50%; border:1px solid var(--border); font-size:11px;
+  display:flex; align-items:center; justify-content:center; color:var(--text-soft); font-family:'IBM Plex Mono',monospace;
+}
+
+.bar-track{width:100%; height:10px; background:var(--ivory); border-radius:10px; overflow:hidden; margin-top:8px;}
+.bar-fill{height:100%; border-radius:10px;}
+
+/* inflow contribution bars */
+.contrib-row{margin-bottom:18px;}
+.contrib-row .contrib-top{display:flex; justify-content:space-between; font-size:13.5px; margin-bottom:6px;}
+.contrib-row .contrib-top strong{font-weight:600;}
+.contrib-row .contrib-top span.pct{font-family:'IBM Plex Mono',monospace; color:var(--burgundy); font-weight:600;}
+
+/* ---------- PROFITABILITY / FORMULA ---------- */
+.formula-box{
+  background:#212528; color:#f2ede1; border-radius:16px; padding:22px 26px; font-family:'IBM Plex Mono',monospace;
+  font-size:14.5px; overflow-x:auto; box-shadow:var(--shadow);
+}
+.formula-box .formula-line{margin:8px 0; white-space:nowrap;}
+.formula-box .fx{color:var(--gold-light);}
+.formula-box .fn{color:#8fd4b8;}
+.term-list{display:grid; grid-template-columns:1fr 1fr; gap:14px 30px; margin-top:24px;}
+@media (max-width:700px){.term-list{grid-template-columns:1fr;}}
+.term{border-left:3px solid var(--gold); padding-left:14px;}
+.term dt{font-weight:600; font-size:14.5px; color:var(--burgundy); margin-bottom:2px;}
+.term dd{margin:0; font-size:13.5px; color:var(--text-soft);}
+
+.example-strip{display:flex; gap:14px; overflow-x:auto; padding:6px 2px 14px;}
+.example-chip{
+  flex-shrink:0; min-width:150px; background:var(--ivory); border:1px solid var(--border); border-radius:14px; padding:16px;
+}
+.example-chip .ex-label{font-size:11.5px; text-transform:uppercase; letter-spacing:.6px; color:var(--text-soft); font-weight:600;}
+.example-chip .ex-value{font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:600; color:var(--burgundy); margin-top:6px;}
+.example-chip.result{background:var(--forest); border-color:var(--forest);}
+.example-chip.result .ex-label{color:rgba(255,255,255,0.75);}
+.example-chip.result .ex-value{color:#fff;}
+
+/* ---------- GAUGE ---------- */
+.gauge-wrap{display:flex; align-items:center; gap:18px;}
+.gauge-num{font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:600; color:var(--burgundy);}
+
+/* ---------- FLOW DIAGRAM ---------- */
+.flow-diagram{display:flex; align-items:stretch; gap:0; flex-wrap:wrap; justify-content:center; margin-top:10px;}
+.flow-box{
+  background:#fff; border:2px solid var(--border); border-radius:16px; padding:20px 22px; text-align:center; min-width:190px;
+  position:relative; cursor:pointer; transition:.2s;
+}
+.flow-box:hover{border-color:var(--gold);}
+.flow-box .flow-label{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:var(--text-soft); font-weight:600;}
+.flow-box .flow-value{font-family:'IBM Plex Mono',monospace; font-size:24px; font-weight:600; color:var(--burgundy); margin:8px 0 4px;}
+.flow-box .flow-sub{font-size:12px; color:var(--text-soft);}
+.flow-arrow{display:flex; align-items:center; justify-content:center; padding:0 18px; color:var(--gold); font-size:26px; font-weight:700;}
+.flow-box.center{border-color:var(--forest); background:linear-gradient(160deg,#fff,rgba(47,93,74,0.05));}
+@media (max-width:800px){.flow-arrow{transform:rotate(90deg); padding:10px;}}
+
+/* ---------- MENU CARDS ---------- */
+.menu-card{
+  background:#fff; border:1px solid var(--border); border-radius:20px; overflow:hidden; cursor:pointer;
+  box-shadow:var(--shadow); transition:.25s; display:flex; flex-direction:column;
+}
+.menu-card:hover{transform:translateY(-5px); box-shadow:var(--shadow-lg); border-color:var(--gold);}
+.menu-card .mc-top{
+  padding:22px 22px 16px; border-bottom:1px solid var(--border);
+  background:linear-gradient(135deg,rgba(110,20,35,0.03),rgba(201,151,59,0.05));
+}
+.menu-card .mc-badges{display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;}
+.menu-card h3{font-size:19px; margin-bottom:4px; line-height:1.25;}
+.menu-card .mc-cat{font-size:12.5px; color:var(--text-soft); font-weight:500;}
+.menu-card .mc-price{font-family:'IBM Plex Mono',monospace; font-size:24px; font-weight:600; color:var(--burgundy); margin-top:10px;}
+.menu-card .mc-body{padding:18px 22px 22px; flex:1; display:flex; flex-direction:column; gap:12px;}
+.menu-card .mc-desc{font-size:13.5px; color:var(--text-soft); line-height:1.55;}
+.menu-card .mc-row{display:flex; justify-content:space-between; align-items:center; font-size:12.5px;}
+.menu-card .mc-row .lbl{color:var(--text-soft); text-transform:uppercase; letter-spacing:.4px; font-weight:600; font-size:11px;}
+.menu-card .conf-dots{display:flex; gap:4px;}
+.menu-card .conf-dots i{width:9px; height:9px; border-radius:50%; background:var(--border); display:block;}
+.menu-card .conf-dots i.on{background:var(--gold);}
+.menu-card .mc-cta{
+  margin-top:6px; font-size:12.5px; font-weight:600; color:var(--forest); display:flex; align-items:center; gap:6px;
+}
+
+/* ---------- PRIORITIZATION ---------- */
+.occasion-group{margin-bottom:36px;}
+.occasion-head{display:flex; align-items:center; gap:14px; margin-bottom:16px;}
+.occasion-head .oc-icon{
+  width:42px; height:42px; border-radius:12px; background:var(--burgundy); color:#fff; display:flex; align-items:center;
+  justify-content:center; font-family:'Poppins',sans-serif; font-weight:700; font-size:16px;
+}
+.occasion-head h3{font-size:19px;}
+.occasion-head .oc-count{font-size:12.5px; color:var(--text-soft); font-family:'IBM Plex Mono',monospace;}
+.priority-card{
+  background:#fff; border:1px solid var(--border); border-radius:14px; padding:18px 20px; margin-bottom:10px;
+  display:grid; grid-template-columns:180px 1fr; gap:20px; align-items:start;
+}
+@media (max-width:700px){.priority-card{grid-template-columns:1fr;}}
+.priority-card .pc-name{font-weight:600; font-size:15px; color:var(--burgundy);}
+.priority-card .pc-price{font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--text-soft); margin-top:4px;}
+.priority-card .pc-reason{font-size:13.5px; color:var(--text-soft);}
+
+/* ---------- FOOTER ---------- */
+footer{background:#231114; color:rgba(255,255,255,0.7); padding:60px 0 30px; margin-top:40px;}
+footer .container{display:flex; flex-direction:column; gap:24px;}
+footer h4{color:#fff; font-size:16px;}
+footer p{font-size:13.5px; color:rgba(255,255,255,0.5); max-width:640px;}
+footer .foot-bottom{border-top:1px solid rgba(255,255,255,0.12); padding-top:20px; font-size:12px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;}
+
+/* ---------- MODAL ---------- */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(35,17,20,0.55); backdrop-filter:blur(3px);
+  display:none; align-items:center; justify-content:center; z-index:1000; padding:24px;
+}
+.modal-overlay.open{display:flex;}
+.modal-box{
+  background:#fff; border-radius:20px; max-width:640px; width:100%; max-height:90vh; overflow-y:auto;
+  padding:34px; position:relative; box-shadow:0 30px 80px rgba(0,0,0,0.35); animation:modalIn .25s ease;
+}
+.modal-box.wide{max-width:980px; max-height:92vh;}
+@media (max-width:1040px){.modal-box.wide{max-width:92vw;}}
+@keyframes modalIn{from{opacity:0; transform:translateY(14px) scale(.98);} to{opacity:1; transform:translateY(0) scale(1);}}
+.modal-close{
+  position:absolute; top:20px; right:20px; width:34px; height:34px; border-radius:50%; border:none;
+  background:var(--ivory); color:var(--text); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.modal-close:hover{background:var(--burgundy); color:#fff;}
+.modal-eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:1px; text-transform:uppercase; color:var(--forest); font-weight:600; margin-bottom:8px;}
+.modal-box h3{font-size:22px; margin-bottom:14px; padding-right:30px;}
+.modal-box p{font-size:14.5px; color:var(--text-soft); margin:0 0 12px;}
+.modal-section{margin-top:18px; padding-top:18px; border-top:1px solid var(--border);}
+.modal-section h5{font-size:12.5px; text-transform:uppercase; letter-spacing:.6px; color:var(--burgundy); font-weight:700; margin-bottom:8px;}
+.modal-mini-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:14px;}
+@media (max-width:560px){.modal-mini-grid{grid-template-columns:repeat(2,1fr);}}
+.modal-mini{background:var(--ivory); border-radius:12px; padding:12px; text-align:center;}
+.modal-mini .mm-label{font-size:10px; text-transform:uppercase; color:var(--text-soft); font-weight:600; letter-spacing:.3px;}
+.modal-mini .mm-value{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:15px; color:var(--burgundy); margin-top:4px;}
+
+/* animate on scroll */
+.reveal{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease;}
+.reveal.show{opacity:1; transform:translateY(0);}
+
+@media print{
+  .navbar,.modal-overlay{display:none !important;}
+  .section{page-break-inside:avoid; padding:30px 0;}
+}
+
+.scroll-top{
+  position:fixed; bottom:26px; right:26px; width:46px; height:46px; border-radius:50%;
+  background:var(--burgundy); color:#fff; border:none; box-shadow:var(--shadow-lg); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-size:18px; opacity:0; pointer-events:none; transition:.3s; z-index:400;
+}
+.scroll-top.show{opacity:1; pointer-events:auto;}
+
+/* ---------- MODAL v2 LAYOUT ---------- */
+.modal-header-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:26px; align-items:start;}
+@media (max-width:700px){.modal-header-grid{grid-template-columns:1fr;}}
+.modal-quickstats{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.seg-chip-row{display:flex; gap:10px; flex-wrap:wrap; margin:14px 0;}
+.seg-chip{
+  flex:1; min-width:110px; border-radius:12px; padding:12px 14px; text-align:center;
+  border:1px solid var(--border);
+}
+.seg-chip .sc-label{font-size:11px; text-transform:uppercase; letter-spacing:.4px; color:var(--text-soft); font-weight:600;}
+.seg-chip .sc-value{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:19px; margin-top:4px;}
+.seg-chip.active{border-width:2px;}
+.seg-chip.family{border-color:var(--forest);}
+.seg-chip.family .sc-value{color:var(--forest);}
+.seg-chip.premium{border-color:var(--gold);}
+.seg-chip.premium .sc-value{color:#8a651f;}
+.seg-chip.edge{border-color:var(--burgundy);}
+.seg-chip.edge .sc-value{color:var(--burgundy);}
+.calc-link{
+  display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; color:var(--forest);
+  cursor:pointer; margin-top:12px; text-decoration:underline; text-underline-offset:3px;
+}
+
+/* ---------- CLEAN COMMUTER FLOW ---------- */
+.flow-clean{display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; padding:10px 0 30px;}
+.flow-col{display:flex; flex-direction:column; align-items:center; gap:10px; min-width:200px; cursor:pointer;}
+.flow-col-label{font-family:'Poppins',sans-serif; font-weight:700; font-size:15px; letter-spacing:.5px;}
+.flow-col-label.inflow{color:var(--forest);}
+.flow-col-label.outflow{color:#8a651f;}
+.flow-arrow-shape{
+  height:64px; width:190px; display:flex; align-items:center; justify-content:center; color:#fff;
+  font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:25px;
+  clip-path: polygon(0 12%, 76% 12%, 76% 0%, 100% 50%, 76% 100%, 76% 88%, 0 88%);
+}
+.flow-arrow-shape.inflow{background:var(--forest); padding-right:24px;}
+.flow-arrow-shape.outflow{background:var(--gold); color:#3a2b0a; padding-right:24px;}
+.flow-col-caption{font-size:12.5px; color:var(--text-soft); text-align:center; max-width:170px;}
+.flow-ring-wrap{position:relative; width:180px; height:180px; margin:0 34px; cursor:pointer;}
+.flow-ring-center{
+  position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+}
+.flow-ring-center .pin{width:16px; height:16px; border-radius:50% 50% 50% 0; background:var(--burgundy); transform:rotate(-45deg); margin-bottom:6px;}
+.flow-ring-center .rc-title{font-family:'Poppins',sans-serif; font-weight:700; font-size:13.5px; color:var(--text);}
+.flow-ring-center .rc-sub{font-size:11.5px; color:var(--text-soft);}
+.flow-ring-bottom{position:absolute; bottom:14px; left:0; right:0; text-align:center;}
+.flow-ring-bottom .rb-num{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:22px; color:var(--forest);}
+.flow-legend-strip{
+  display:flex; gap:0; border-top:1px solid var(--border); margin-top:10px; flex-wrap:wrap;
+}
+.flow-legend-item{
+  flex:1; min-width:200px; padding:20px 22px; display:flex; align-items:center; gap:14px; cursor:pointer; border-right:1px solid var(--border);
+}
+.flow-legend-item:last-child{border-right:none;}
+.flow-legend-icon{width:34px; height:34px; border-radius:9px; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:16px;}
+.flow-legend-text .fl-label{font-size:11.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--text-soft); font-weight:600;}
+.flow-legend-text .fl-value{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:20px; color:var(--text);}
+.flow-legend-text .fl-caption{font-size:12px; color:var(--text-soft);}
+
+/* ============ CONCEPT MODAL (popup) SYSTEM ============ */
+.msect-kpi-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-top:8px;}
+.msect-kpi-card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow); cursor:pointer; display:flex; flex-direction:column; gap:8px; transition:transform .2s, box-shadow .2s, border-color .2s;}
+.msect-kpi-card:hover{transform:translateY(-3px); box-shadow:var(--shadow-lg); border-color:var(--gold);}
+.msect-kpi-card .mk-label{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.6px; text-transform:uppercase; color:var(--text-soft);}
+.msect-kpi-card .mk-val{font-family:'Poppins',sans-serif; font-weight:800; font-size:30px; color:var(--burgundy); line-height:1.1;}
+.msect-kpi-card .mk-sub{font-size:12px; color:var(--text-soft);}
+.msect-kpi-card .mk-badge{align-self:flex-start; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.4px; text-transform:uppercase; padding:4px 11px; border-radius:20px; font-weight:700;}
+.mk-badge.pos{background:rgba(47,93,74,0.12); color:var(--forest);}
+.mk-badge.neutral{background:rgba(201,151,59,0.16); color:#8a651f;}
+.mk-badge.neg{background:rgba(110,20,35,0.1); color:var(--burgundy);}
+
+.concept-modal-backdrop{position:fixed; inset:0; z-index:599; background:rgba(43,41,38,0.45); opacity:0; pointer-events:none; transition:opacity .18s ease;}
+.concept-modal-backdrop.open{opacity:1; pointer-events:auto;}
+.concept-modal{position:fixed; z-index:600; left:50%; top:50%; width:min(920px, calc(100vw - 28px)); max-height:min(90vh,920px); display:flex; flex-direction:column; overflow:hidden; background:#fff; color:var(--text); border-radius:20px; box-shadow:0 30px 80px rgba(43,41,38,0.3); opacity:0; transform:translate(-50%,-50%) scale(.97); pointer-events:none; transition:opacity .16s ease, transform .16s ease;}
+.concept-modal.open{opacity:1; transform:translate(-50%,-50%) scale(1); pointer-events:auto;}
+.cm-head{position:sticky; top:0; z-index:2; flex:0 0 auto; background:linear-gradient(180deg,#fff,#FBF7EF); padding:22px 58px 18px 26px; border-bottom:1px solid var(--border);}
+.cm-head .cm-eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--forest); font-weight:700; display:block; margin-bottom:6px;}
+.cm-head h3{font-family:'Poppins',sans-serif; font-weight:800; font-size:23px; margin:0; color:var(--burgundy);}
+.cm-head .cm-item-name{font-size:13px; color:var(--text-soft); margin-top:4px; font-weight:500;}
+.cm-close{position:absolute; top:16px; right:18px; color:var(--text-soft); font-size:18px; cursor:pointer; line-height:1; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:#fff; border:1px solid var(--border); transition:background .15s,color .15s;}
+.cm-close:hover{background:var(--burgundy); color:#fff;}
+.cm-body{padding:22px 26px 30px; overflow-y:auto; flex:1 1 auto;}
+.cm-foot{flex:0 0 auto; border-top:1px solid var(--border); padding:12px 26px; display:flex; justify-content:flex-end; background:#FBF7EF;}
+.cm-foot-close{font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.6px; text-transform:uppercase; background:var(--burgundy); color:#fff; padding:9px 20px; border-radius:20px; cursor:pointer; font-weight:700;}
+.cm-foot-close:hover{background:var(--burgundy-light);}
+
+.cm-kpi-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:22px;}
+.cm-kpi{background:#fff; border:1px solid var(--border); border-radius:14px; padding:14px 16px; box-shadow:var(--shadow);}
+.cm-kpi .cm-kpi-label{font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--text-soft); display:block; margin-bottom:6px;}
+.cm-kpi .cm-kpi-val{font-family:'Poppins',sans-serif; font-weight:800; font-size:21px; color:var(--burgundy); line-height:1.15;}
+.cm-kpi .cm-kpi-sub{font-size:10.5px; color:var(--text-soft); margin-top:4px;}
+.cm-kpi.accent{border-color:var(--gold); background:#FEFBF3;}
+
+.cm-tabs{display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap;}
+.cm-tab{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.4px; text-transform:uppercase; padding:7px 16px; border-radius:18px; border:1px solid var(--border); background:#fff; color:var(--text-soft); cursor:pointer; font-weight:700; transition:all .12s;}
+.cm-tab:hover{border-color:var(--gold); color:var(--text);}
+.cm-tab.active{background:var(--burgundy); border-color:var(--burgundy); color:#fff;}
+
+.cm-section{margin-top:24px;}
+.cm-section:first-of-type{margin-top:0;}
+.cm-section-title{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--forest); font-weight:700; margin:0 0 10px; padding-bottom:8px; border-bottom:2px solid var(--border);}
+.cm-purpose{font-size:13.5px; color:var(--text-soft); line-height:1.7; margin:0;}
+
+.cm-table{width:100%; border-collapse:collapse; font-size:12.6px; background:#fff; border-radius:10px; overflow:hidden; box-shadow:var(--shadow);}
+.cm-table th{text-align:left; font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--forest); background:#F1EAD9; padding:9px 12px; border-bottom:1px solid var(--border);}
+.cm-table td{padding:9px 12px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:top; line-height:1.5;}
+.cm-table td.tbl-num{font-family:'IBM Plex Mono',monospace; white-space:nowrap; color:var(--burgundy); font-weight:600;}
+.cm-table tr:last-child td{border-bottom:none;}
+.cm-table tr:nth-child(even) td{background:#FBF8F1;}
+.cm-table tr.tbl-hl td{background:#F7EAD4; font-weight:700;}
+
+.cm-formula-box{font-family:'IBM Plex Mono',monospace; font-size:12px; background:#F1EAD9; color:var(--text); border:1px solid var(--border); border-left:3px solid var(--burgundy); border-radius:8px; padding:11px 14px; line-height:1.75; margin-bottom:8px;}
+.cm-formula-box .cm-f-tag{color:var(--burgundy); font-weight:700; margin-right:8px;}
+
+.cm-solve{display:flex; flex-direction:column; gap:10px; margin:12px 0;}
+.cm-solve-step{background:#fff; border:1px solid var(--border); border-left:3px solid var(--gold); border-radius:10px; padding:12px 15px; box-shadow:var(--shadow);}
+.cm-solve-step .ss-n{display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--burgundy); color:#fff; font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:700; margin-right:8px;}
+.cm-solve-step .ss-formula{font-size:12.5px; color:var(--text); font-weight:600;}
+.cm-solve-step .ss-sub{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text-soft); margin:6px 0 2px 28px;}
+.cm-solve-step .ss-result{font-family:'Poppins',sans-serif; font-weight:800; font-size:18px; color:var(--forest); margin-left:28px;}
+.cm-solve-step .ss-result::before{content:"= "; color:var(--text-soft); font-family:'Inter',sans-serif; font-weight:400; font-size:13px;}
+.cm-solve-step .ss-note{font-size:11.8px; color:var(--text-soft); margin:8px 0 0 28px; line-height:1.55; font-style:italic; padding-top:8px; border-top:1px dashed var(--border);}
+.cm-solve-group{margin-bottom:18px;}
+.cm-solve-group:last-child{margin-bottom:0;}
+.cm-solve-group-label{display:inline-block; font-family:'Poppins',sans-serif; font-weight:700; font-size:14px; letter-spacing:.2px; color:#fff; background:var(--forest); padding:3px 14px; border-radius:12px; margin-bottom:8px;}
+
+.cm-why{background:#FBF7EF; border:1px solid var(--border); border-radius:10px; padding:12px 15px; margin-bottom:8px; font-size:12.3px; color:var(--text-soft); line-height:1.65;}
+.cm-why b{color:var(--burgundy);}
+.cm-example{background:#FBF7EF; border:1px solid var(--border); border-radius:10px; padding:16px 18px; margin-top:8px;}
+.cm-example-tag{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--burgundy); font-weight:700; display:block; margin-bottom:10px;}
+.cm-badge{display:inline-block; padding:4px 12px; border-radius:20px; font-family:'Poppins',sans-serif; font-weight:700; font-size:14px;}
+.cm-badge.add{background:var(--forest); color:#fff;}
+
+@media(max-width:640px){
+  .cm-head{padding:16px 46px 14px 16px;}
+  .cm-body{padding:16px 14px 24px;}
+  .cm-kpi-row{grid-template-columns:repeat(2,1fr);}
+}
+
+/* ============ ETHNICITY SECTION ============ */
+.ethnic-wrap{display:grid; grid-template-columns:1.15fr 1fr; gap:32px; align-items:start;}
+@media(max-width:900px){.ethnic-wrap{grid-template-columns:1fr;}}
+.ethnic-bars{display:flex; flex-direction:column; gap:14px;}
+.ethnic-bar-row .eb-top{display:flex; justify-content:space-between; font-size:13.5px; margin-bottom:6px;}
+.ethnic-bar-row .eb-top strong{font-weight:600;}
+.ethnic-bar-row .eb-top span.pct{font-family:'IBM Plex Mono',monospace; color:var(--burgundy); font-weight:700;}
+.ethnic-bar-row .eb-sub{font-size:11.5px; color:var(--text-soft); margin-top:4px;}
+.income-compare{display:flex; gap:14px; margin-top:6px; flex-wrap:wrap;}
+.income-chip{flex:1; min-width:140px; background:var(--ivory); border:1px solid var(--border); border-radius:14px; padding:16px;}
+.income-chip .ic-label{font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:var(--text-soft); font-weight:600;}
+.income-chip .ic-value{font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--burgundy); margin-top:6px;}
+.income-chip.city{background:var(--forest); border-color:var(--forest);}
+.income-chip.city .ic-label{color:rgba(255,255,255,0.75);}
+.income-chip.city .ic-value{color:#fff;}
+
+/* ============ REVENUE SECTION ============ */
+.rev-card-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:8px;}
+@media(max-width:900px){.rev-card-grid{grid-template-columns:1fr;}}
+.rev-card{background:var(--card); border:1px solid var(--border); border-radius:20px; padding:28px 26px; box-shadow:var(--shadow); cursor:pointer; transition:transform .2s, box-shadow .2s; position:relative;}
+.rev-card:hover{transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:var(--gold);}
+.rev-card .rc-period{font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.6px; text-transform:uppercase; color:var(--forest); font-weight:700;}
+.rev-card .rc-value{font-family:'Poppins',sans-serif; font-weight:800; font-size:34px; color:var(--burgundy); margin:10px 0 6px;}
+.rev-card .rc-sub{font-size:12.5px; color:var(--text-soft);}
+.rev-card .rc-tap{margin-top:14px; font-size:12px; font-weight:600; color:var(--forest); display:flex; align-items:center; gap:6px;}
+.rev-card.next6{border-top:4px solid var(--gold);}
+.rev-card.next9{border-top:4px solid var(--burgundy);}
+.rev-card.cur6{border-top:4px solid var(--forest);}
+
+.rev-table-wrap{overflow-x:auto; margin-top:36px; border-radius:16px; box-shadow:var(--shadow);}
+table.rev-table{width:100%; border-collapse:collapse; background:#fff; font-size:13px; border-radius:16px; overflow:hidden;}
+table.rev-table thead th{text-align:left; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--forest); background:#F1EAD9; padding:13px 15px; white-space:nowrap;}
+table.rev-table td{padding:12px 15px; border-bottom:1px solid var(--border); vertical-align:top;}
+table.rev-table tbody tr:nth-child(even){background:#FBF8F1;}
+table.rev-table tbody tr:hover{background:#F5EAD3;}
+table.rev-table .rt-item{font-weight:700; color:var(--burgundy);}
+table.rev-table .rt-num{font-family:'IBM Plex Mono',monospace;}
+</style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <div class="nav-brand">Menu Intelligence</div>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#zip">Market</a>
+      <a href="#segmentation">Segments</a>
+      <a href="#profitability">Profitability</a>
+      <a href="#flow">Commuter Flow</a>
+      <a href="#ethnicity">Ethnicity</a>
+      <a href="#revenue">Revenue</a>
+      <a href="#menu">Menu</a>
+      <a href="#occasion">Scheduling</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="cover">
+  <div class="hero-inner">
+    <div class="hero-eyebrow"><span class="dot"></span> Menu Intelligence &amp; New-Item Development</div>
+    <h1>New Menu Items,<br>Built for <em>This Market</em>.</h1>
+    <p class="lead">A data-driven new-menu development report for a Quick-Service / Fast-Casual concept entering this market — every recommendation traced back to real demographic, income, and competitive data for this ZIP.</p>
+    <div class="hero-meta">
+      <div class="chip"><div class="label">Market</div><div class="value">Memphis, TN</div></div>
+      <div class="chip"><div class="label">County</div><div class="value">Shelby</div></div>
+      <div class="chip"><div class="label">Concept Type</div><div class="value">QSR / Fast-Casual</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="section" id="about">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">01 · About This Report</span>
+      <h2>How These Recommendations Were Built</h2>
+      <p>This is a new-menu development exercise, not a refresh of an existing menu — all items below are new introductions, generated for a restaurant that does not yet have a menu in this ZIP. Every claim in this report is labeled by type, so you always know whether you're looking at a fact, a calculation, or a judgment call.</p>
+    </div>
+
+    <div class="grid grid-4" style="margin-bottom:40px;">
+      <div class="callout gold reveal">
+        <div class="icon">D</div>
+        <div><h4>Real Data</h4><p>U.S. Census-style demographic, income, and commuter-flow figures for ZIP 38114, plus the actual list of 19 real restaurants operating in this ZIP.</p></div>
+      </div>
+      <div class="callout forest reveal">
+        <div class="icon">C</div>
+        <div><h4>Calculated Values</h4><p>Numbers derived directly from the real data using a stated formula — household income-bracket shares, gross profit, food cost %, and profitability %.</p></div>
+      </div>
+      <div class="callout burgundy reveal">
+        <div class="icon">I</div>
+        <div><h4>Business Interpretation</h4><p>Judgment calls that translate data into strategy — for example, reading "no cuisine-type field" restaurant names to infer a local style, or setting a price band.</p></div>
+      </div>
+      <div class="callout gold reveal">
+        <div class="icon">E</div>
+        <div><h4>Reasoned Estimates</h4><p>Directional estimates built from real inputs where no single measured field exists — such as splitting a weekday vs. weekend customer mix using commuter data.</p></div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card reveal">
+        <h4 style="margin-bottom:10px;">What data was used</h4>
+        <p style="font-size:14.5px; color:var(--text-soft); margin:0;">
+          ZIP-level population, income brackets, age, household size, employment and labor-force data; commuter inflow/outflow (who lives here vs. who works here); restaurant count and density; and the real names of the 19 existing restaurants in ZIP 38114.
+        </p>
+      </div>
+      <div class="card reveal">
+        <h4 style="margin-bottom:10px;">What data was NOT used</h4>
+        <p style="font-size:14.5px; color:var(--text-soft); margin:0;">
+          This information is not available in the provided dataset and has not been estimated: customer reviews, star ratings, POS sales history, nutrition/calorie data, and a direct cuisine-type field for the comparable restaurants (their style is inferred from restaurant names only).
+        </p>
+      </div>
+    </div>
+
+    <div class="callout forest reveal" style="margin-top:22px;">
+      <div class="icon">!</div>
+      <div>
+        <h4>Methodology Philosophy</h4>
+        <p>Comparable restaurants in this ZIP are used only to <strong>validate</strong> that a food style is already viable here — they are never the source of a recommendation. Every item is generated primarily from demographics, income-based customer segmentation, cuisine fit, market opportunity, and profitability. Click any card or metric throughout this report to see exactly how it was derived — evidence opens in a pop-up rather than pushing the page around.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section alt" id="zip">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">02 · ZIP Code Intelligence</span>
+      <h2>Who Lives and Works Here</h2>
+      <p>Real, measured data for this ZIP, Memphis, TN (Shelby County). Click any card for a plain-language definition and the exact source field.</p>
+    </div>
+
+    <div class="grid grid-4" id="zipStatsGrid"></div>
+  </div>
+</section>
+
+<section class="section" id="segmentation">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">03 · Customer Segmentation</span>
+      <h2>How the Market Splits Into Three Segments</h2>
+      <p>Every household in this ZIP is grouped into one of three spending tiers. The split is decided from real demographic and economic data for this ZIP — primarily household income brackets, alongside employment and labor-force figures — not from survey or sentiment data.</p>
+    </div>
+
+    <div class="seg-wrap reveal">
+      <div class="donut-wrap">
+        <svg viewBox="0 0 240 240" width="280" height="280">
+          <g transform="translate(120,120)">
+            <circle r="88" fill="none" stroke="#F1EAD9" stroke-width="30"></circle>
+            <g id="donutSegments" transform="rotate(-90)"></g>
+          </g>
+          <text x="120" y="112" text-anchor="middle" font-family="Poppins" font-weight="800" font-size="30" fill="#6E1423">10,025</text>
+          <text x="120" y="134" text-anchor="middle" font-family="Inter" font-size="12.5" fill="#6B6560">Total Households</text>
+        </svg>
+      </div>
+      <div class="seg-legend" id="segLegend"></div>
+    </div>
+  </div>
+</section>
+<section class="section alt" id="profitability">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">04 · Profitability Analysis</span>
+      <h2>What This Menu Is Projected to Earn</h2>
+      <p>Profitability is the one place in this report driven by fixed formulas — every other judgment call (cuisine fit, segment fit, confidence score) is a qualitative business read, not a calculation. The three cards below total the projected profit dollars across all 7 recommended items. Click any card for the full formula, every term defined, and the worked example.</p>
+    </div>
+
+    <div class="msect-kpi-grid" id="menuProfitGrid"></div>
+
+    <div class="card reveal" style="margin-top:28px;">
+      <h4 style="margin-bottom:14px;">Profitability by Item — Ranked Highest to Lowest</h4>
+      <div class="rev-table-wrap" style="box-shadow:none; margin-top:0;">
+        <table class="rev-table" id="profitByItemTable"></table>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section" id="flow">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">05 · Commuter Flow Before Menu Recommendations</span>
+      <h2>Who's Actually On the Ground, By Day</h2>
+      <p>Before recommending any item, the pipeline checks who is physically present in this ZIP on a weekday versus a weekend — the same inflow/outflow view used by the U.S. Census Bureau's OnTheMap tool. Click any part of the diagram for the plain-language definition.</p>
+    </div>
+
+    <div class="card reveal" style="padding:36px 26px 0;">
+      <div class="flow-clean">
+        <div class="flow-col" onclick="openEvidence('Weekday Inflow — 3,521 workers','Workers who live outside ZIP 38114 but commute in to work here. There are 3,687 jobs physically located in this ZIP; 3,521 of them (95.5%) are filled by outside workers commuting in.')">
+          <div class="flow-col-label inflow">INFLOW</div>
+          <div class="flow-arrow-shape inflow">3,521</div>
+          <div class="flow-col-caption">Workers come in to 38114 for work</div>
+        </div>
+
+        <div class="flow-ring-wrap" onclick="openEvidence('Employed &amp; Live in ZIP 38114 — 166','Residents who both live and work inside ZIP 38114 — the only group that doesn&#39;t commute in or out. Of 9,629 local workforce residents, only 166 (1.7%) both live and work here.')">
+          <svg viewBox="0 0 180 180" width="180" height="180">
+            <circle cx="90" cy="90" r="72" fill="none" style="stroke:#2F5D4A;" stroke-width="16" stroke-linecap="round"
+              stroke-dasharray="339 113" transform="rotate(-135 90 90)"></circle>
+            <path d="M 149 42 L 165 34 L 158 51 Z" fill="#2F5D4A"></path>
+          </svg>
+          <div class="flow-ring-center">
+            <div class="pin"></div>
+            <div class="rc-title">Memphis</div>
+            <div class="rc-sub">38114</div>
+          </div>
+          <div class="flow-ring-bottom"><div class="rb-num">166</div></div>
+        </div>
+
+        <div class="flow-col" onclick="openEvidence('Weekday Outflow — 9,463 residents','Residents of ZIP 38114 who leave the ZIP to work elsewhere. Of the 9,629 residents in the local workforce, 9,463 (98.28%) commute out for work — leaving only 166 residents who both live and work in this ZIP.')">
+          <div class="flow-col-label outflow">OUTFLOW</div>
+          <div class="flow-arrow-shape outflow">9,463</div>
+          <div class="flow-col-caption">Workers leave 38114 for work</div>
+        </div>
+      </div>
+
+      <div class="flow-legend-strip">
+        <div class="flow-legend-item" onclick="openEvidence('Inflow (In-Commuters) — 3,521','Workers who live outside ZIP 38114 but commute in to work here — 95.5% of the 3,687 jobs located in this ZIP.')">
+          <div class="flow-legend-icon" style="background:var(--forest);">→</div>
+          <div class="flow-legend-text">
+            <div class="fl-label">Inflow (In-Commuters)</div>
+            <div class="fl-value">3,521</div>
+            <div class="fl-caption">Workers come in to 38114 for work</div>
+          </div>
+        </div>
+        <div class="flow-legend-item" onclick="openEvidence('Within (Live &amp; Work) — 166','Residents who both live and work inside ZIP 38114, out of 9,629 local workforce residents (1.7%).')">
+          <div class="flow-legend-icon" style="background:var(--burgundy);">○</div>
+          <div class="flow-legend-text">
+            <div class="fl-label">Within (Live &amp; Work)</div>
+            <div class="fl-value">166</div>
+            <div class="fl-caption">Workers live and work in 38114</div>
+          </div>
+        </div>
+        <div class="flow-legend-item" onclick="openEvidence('Outflow (Out-Commuters) — 9,463','Residents of ZIP 38114 who leave the ZIP to work elsewhere — 98.28% of the 9,629 residents in the local workforce.')">
+          <div class="flow-legend-icon" style="background:var(--gold); color:#3a2b0a;">→</div>
+          <div class="flow-legend-text">
+            <div class="fl-label">Outflow (Out-Commuters)</div>
+            <div class="fl-value">9,463</div>
+            <div class="fl-caption">Workers leave 38114 for work</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p style="text-align:center; font-size:12.5px; color:var(--text-soft); margin-top:18px;">This ZIP has a net job deficit of −5,942 (more working residents than local jobs) — a real, measured figure that explains why weekday inflow is smaller than weekday outflow.</p>
+  </div>
+</section>
+<section class="section alt" id="ethnicity">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">06 · Ethnicity &amp; Income Composition</span>
+      <h2>Race, Ethnicity &amp; Income Context for This ZIP</h2>
+      <p>Real, sourced U.S. Census race/ethnicity data for ZIP 38114, shown alongside this ZIP's own median household income. Click any bar for its exact count and source.</p>
+    </div>
+
+    <div class="ethnic-wrap">
+      <div class="card reveal">
+        <h4 style="margin-bottom:16px;">Race &amp; Ethnicity — ZIP 38114</h4>
+        <div class="ethnic-bars" id="ethnicBars"></div>
+      </div>
+
+      <div class="reveal">
+        <div class="card" style="margin-bottom:22px;">
+          <h4 style="margin-bottom:6px;">Median Household Income</h4>
+          <p style="font-size:13px; color:var(--text-soft); margin-bottom:16px;">ZIP 38114 compared to the City of Memphis overall (not broken out by ethnicity — see why, below).</p>
+          <div class="income-compare">
+            <div class="income-chip"><div class="ic-label">ZIP 38114 Median</div><div class="ic-value">$29,492</div></div>
+            <div class="income-chip city"><div class="ic-label">City of Memphis Median</div><div class="ic-value">$51,736</div></div>
+          </div>
+        </div>
+        <div class="callout burgundy">
+          <div class="icon">!</div>
+          <div>
+            <h4>Why isn't income broken out by ethnicity?</h4>
+            <p>ZIP 38114 is 89.74% one race (Black/African American); every other group is under 5% of the population (Asian is roughly 36 people). At that sample size, the Census Bureau's own subgroup income estimates for a single ZIP carry a margin of error larger than the estimate itself, or are suppressed outright. Presenting a ZIP-level "median income by ethnicity" figure here would not be a real, defensible number — so it isn't shown. <span class="calc-link" onclick="openIncomeLimitation()">Read the full data-limitation note →</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section" id="revenue">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">07 · Revenue Forecast</span>
+      <h2>What This Menu Is Projected to Sell</h2>
+      <p>Revenue is projected from the real Category Volume Index (comparable-restaurant POS sales), this ZIP's own Market Demand Composite Index, and a documented ramp-up assumption for new items — never from the profitability formulas above. Click any card for the full build, every term defined, and why each factor is used.</p>
+    </div>
+
+    <div class="rev-card-grid" id="revenueCardGrid"></div>
+
+    <div class="reveal">
+      <h3 style="font-size:17px; margin:44px 0 4px; color:var(--burgundy);">Overall Picture — Every Recommended Item</h3>
+      <p style="font-size:13.5px; color:var(--text-soft); margin-bottom:0;">Comparable restaurants are shown as market-fit validation only — never as the source of the revenue estimate. Click any row for that item's full revenue build.</p>
+      <div class="rev-table-wrap">
+        <table class="rev-table" id="revenueOverviewTable"></table>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section alt" id="menu">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">08 · Recommended Menu</span>
+      <h2>New Items for This Market</h2>
+      <p>Click any card to open the full recommendation — demographic reasoning, comparable-restaurant validation, profitability, and weekday/weekend role.</p>
+    </div>
+    <div class="grid grid-3" id="menuGrid"></div>
+  </div>
+</section>
+
+<section class="section" id="occasion">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">09 · Menu Item Prioritization by Service Occasion</span>
+      <h2>When Each Item Should Be Pushed</h2>
+      <p>Each item is assigned to the service occasion it's best suited for, using its own weekday/weekend role, delivery suitability, and segment timing — not a generic template.</p>
+    </div>
+    <div id="occasionGroups"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div>
+      <h4>Menu Intelligence Report</h4>
+      <p>Prepared as a new-menu development analysis for a Quick-Service / Fast-Casual concept in Memphis, TN. Recommendations are generated from demographics, income-based segmentation, cuisine fit, market opportunity, and profitability; comparable restaurants in the ZIP serve only as validation, never as the source of a recommendation. No review, rating, or POS sales data was available for this ZIP.</p>
+    </div>
+    <div class="foot-bottom">
+      <span>Memphis, TN · Shelby County</span>
+      <span>Menu Intelligence &amp; Financial Analysis</span>
+    </div>
+  </div>
+</footer>
+
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+<div class="concept-modal-backdrop" id="cmBackdrop"></div>
+<div class="concept-modal" id="cmModal"></div>
+
+<script>
+
+
+const ITEMS = [{"name": "Bourbon Smoke Tenders", "category": "Wings", "ingredients": "Buttermilk-brined chicken tenders, panko breading, bourbon glaze", "description": "Buttermilk-brined chicken tenders, double-fried, tossed in a bourbon glaze.", "priceBand": "Value", "price": 4.99, "localStyleNote": "Bourbon Smoke Tenders is a double-fried, bourbon-glazed chicken-tender item in the Wings/Chicken category. It was selected for the Value price tier and the income fit described in the Demographic Fit Reason column -- not from any local-restaurant-count analysis.", "confidence": 4, "confidenceExplanation": "Confidence: 4/5. Value-tier fit is strong and margin is solid -- a dependable everyday seller. This ZIP is a below-national-median-income, price-conscious market ($29,492 median household income, 15.5% unemployment) where Value is a routine, everyday-affordable price point. This item's own Gross Profit Margin is 49.9%. By this ZIP's commuter-driven crowd split, Value draws an estimated 56.58% of weekday crowd and 67.78% of weekend crowd.", "reason": "Who it's for: the Value segment (56.58% weekday / 67.78% weekend crowd share), this ZIP's largest crowd on both weekdays and weekends. What it does: a double-fried, bourbon-glazed chicken tender priced for routine, everyday ordering by a budget-conscious household, in a food style (Wings/Chicken) already well established locally.", "demographicFit": "This ZIP's median household income is $29,492 and unemployment sits at 15.5% -- both well below national norms (roughly half the U.S. median household income). That is a price-conscious, budget-driven market. A Value-tier item is priced for routine, everyday ordering -- a direct match for this income level, not a stretch. Households here typically reserve restaurant spending for low-risk, frequent purchases rather than occasional splurges, which is exactly what this tier supports.", "residentialNote": "Supporting context for Bourbon Smoke Tenders, not a direct input to its selection: this zip is classified 'SUBURBAN' with a 'BALANCED' business/residential mix and no tourist or office/school/hospital anchor. Given high delivery suitability for this item, that points to mostly local walk-in and delivery orders rather than office lunch traffic for this specific item.", "weekdayRole": "Lunch/dinner routine order. Value draws an estimated 56.58% of weekday crowd here -- resident daytime traffic plus in-commuting workers (98.28% of residents leave the ZIP for work, so weekday volume leans on the ~3,700 workers who commute in or work locally).", "weekendRole": "Steady weekend seller, same role. Value holds an estimated 67.78% of weekend crowd, once out-commuting residents are home and the mix reverts to this ZIP's resident household-income profile (median $29,492).", "familyFit": "Strong", "premiumFit": "Low (by design)", "premiumAdjacentFit": "Upgrade path: swap the bourbon glaze for a smoked-bourbon-and-brown-butter reduction and add a smoked Gouda drizzle, then reposition at the Premium tier -- a named ingredient upgrade, not just a price change.", "healthFit": "Double-fried and glazed -- not a health-positioned item. Judgment call from named ingredients and cooking method; no calorie or macro data exists in either source file.", "delivery": "High", "portionsNote": "Larger, shareable portion sized for this zip's target Value segment (56.58% weekday / 67.78% weekend crowd share) -- matching the area's average household size of 2.2, supporting frequent, everyday, high-value orders.", "ingredientCost": 2, "prepCost": 0.5, "theoreticalCost": 2.5, "profitDollar": 2.49, "profitPct": 49.9, "costPct": 50.1, "proj3": 4.73, "proj6": 8.99, "proj9": 17.08, "compCount": 4, "comp1": "KFC", "comp2": "Church's Texas Chicken", "compMatchCriteria": "Category (Wings) matched to the two named comparable restaurants above. Cited as directional local-market evidence only, not as the basis for creating this item.", "compCuisineMatch": "This item's category (Wings) is represented among the named comparable restaurants above. No ZIP-wide restaurant-count percentage is used for this match.", "compDemoMatch": "100% -- both named comparable restaurants are real establishments located in this same ZIP code, per the source file's restaurant list.", "compEvidenceStrength": "Moderate -- based on the two named comparable restaurants above; no ZIP-wide restaurant-count statistic is used.", "compMenuEvidence": "KFC and Church's Texas Chicken are named as comparable Wings-category restaurants in this ZIP. Cited as supporting directional evidence for local demand, not as the source of this recommendation.", "sentimentFit": "No review, survey, or star-rating data exists for this ZIP, so this is stated plainly rather than invented. As the closest proxy: double-fried, bourbon-glazed chicken tenders read as clearly Indulgent, consistent with this ZIP's 56.5% Indulgent-leaning local food profile.", "trendFit": "Presented as market context, not as the basis for this recommendation: this ZIP has a real, measured competitor density of 0.86 restaurants per 1,000 residents (19 restaurants total) -- well below a typical urban ZIP -- alongside a -16.55% population growth rate and a BALANCED business/residential mix. Together this points to a market with few existing dining options generally, which supports -- but is not itself the reason for -- recommending a new item here; the recommendation is driven by the demographic and customer-segment analysis above.", "segWeekday": 56.58, "segWeekend": 67.78, "plainReason": "A budget-friendly, shareable chicken tender basket built for local families and regular takeout orders.", "plainConfidence": "We're fairly confident (4 out of 5) — it's priced right for this area's typical household budget and still makes a solid profit.", "confidenceReasoning": "This item earns a 4 out of 5 confidence score. At $4.99, the price matches what most households in this ZIP typically spend, so demand should be steady. Profit also builds nicely over time -- from about $4.73 in the first 3 months to $17.08 by 9 months -- which supports a strong, low-risk recommendation for the Value segment (56.58% weekday / 67.78% weekend crowd share).", "segmentFitNote": "Value is this ZIP's largest group by far (about 68% of households), so a budget-priced, shareable item like this is built to match how most local shoppers spend."}, {"name": "Garlic Parmesan Boneless Bites", "category": "Wings", "ingredients": "Boneless chicken bites, seasoned breading, garlic-parmesan butter sauce", "description": "Crispy boneless chicken bites tossed in a garlic-parmesan butter sauce.", "priceBand": "Value", "price": 4.99, "localStyleNote": "Garlic Parmesan Boneless Bites is a saucier, boneless take on the same Wings/Chicken category as Bourbon Smoke Tenders. It was selected for the Value price tier and income fit described elsewhere, adding menu variety within a proven category rather than duplicating a flavor profile.", "confidence": 4, "confidenceExplanation": "Confidence: 4/5. Same strong Value-tier fit and margin profile as Bourbon Smoke Tenders -- a dependable everyday seller. This ZIP is a below-national-median-income, price-conscious market ($29,492 median household income, 15.5% unemployment) where Value is a routine, everyday-affordable price point. This item's own Gross Profit Margin is 49.9%. By this ZIP's commuter-driven crowd split, Value draws an estimated 56.58% of weekday crowd and 67.78% of weekend crowd.", "reason": "Who it's for: the Value segment (56.58% weekday / 67.78% weekend crowd share). What it does: a saucier, boneless alternative to Bourbon Smoke Tenders at the same everyday price point, adding menu variety within the same proven Wings/Chicken style without duplicating the flavor profile.", "demographicFit": "This ZIP's median household income is $29,492 and unemployment sits at 15.5% -- both well below national norms (roughly half the U.S. median household income). That is a price-conscious, budget-driven market. A Value-tier item is priced for routine, everyday ordering -- a direct match for this income level, not a stretch. Households here typically reserve restaurant spending for low-risk, frequent purchases rather than occasional splurges, which is exactly what this tier supports.", "residentialNote": "Supporting context for Garlic Parmesan Boneless Bites, not a direct input to its selection: this zip is classified 'SUBURBAN' with a 'BALANCED' business/residential mix and no tourist or office/school/hospital anchor. Given high delivery suitability for this item, that points to mostly local walk-in and delivery orders rather than office lunch traffic for this specific item.", "weekdayRole": "Lunch/dinner routine order. Value draws an estimated 56.58% of weekday crowd here -- resident daytime traffic plus in-commuting workers (98.28% of residents leave the ZIP for work, so weekday volume leans on the ~3,700 workers who commute in or work locally).", "weekendRole": "Steady weekend seller, same role. Value holds an estimated 67.78% of weekend crowd, once out-commuting residents are home and the mix reverts to this ZIP's resident household-income profile (median $29,492).", "familyFit": "Strong", "premiumFit": "Low (by design)", "premiumAdjacentFit": "Upgrade path: swap the standard parmesan for a white-truffle garlic-parmesan finish and add a shaved parmesan crust, then reposition at the Premium tier.", "healthFit": "Fried and butter-sauced -- not a health-positioned item, though slightly lighter than a battered tender. Judgment call from named ingredients; no nutrition data exists in either source file.", "delivery": "High", "portionsNote": "Larger, shareable portion sized for this zip's target Value segment (56.58% weekday / 67.78% weekend crowd share) -- matching the area's average household size of 2.2, supporting frequent, everyday, high-value orders.", "ingredientCost": 2, "prepCost": 0.5, "theoreticalCost": 2.5, "profitDollar": 2.49, "profitPct": 49.9, "costPct": 50.1, "proj3": 4.73, "proj6": 8.99, "proj9": 17.08, "compCount": 4, "comp1": "KFC", "comp2": "Church's Texas Chicken", "compMatchCriteria": "Category (Wings) matched to the two named comparable restaurants above. Cited as directional local-market evidence only, not as the basis for creating this item.", "compCuisineMatch": "This item's category (Wings) is represented among the named comparable restaurants above. No ZIP-wide restaurant-count percentage is used for this match.", "compDemoMatch": "100% -- both named comparable restaurants are real establishments located in this same ZIP code, per the source file's restaurant list.", "compEvidenceStrength": "Moderate -- based on the two named comparable restaurants above; no ZIP-wide restaurant-count statistic is used.", "compMenuEvidence": "KFC and Church's Texas Chicken are named as comparable Wings-category restaurants in this ZIP. Cited as supporting directional evidence for local demand, not as the source of this recommendation.", "sentimentFit": "No review or rating data exists for this ZIP. As the closest proxy: boneless bites in a garlic-parmesan butter sauce are saucy and rich -- Indulgent, in line with this ZIP's 56.5% Indulgent-leaning profile, though slightly less heavy than a fried tender given the boneless, butter-sauce format.", "trendFit": "Presented as market context, not as the basis for this recommendation: this ZIP has a real, measured competitor density of 0.86 restaurants per 1,000 residents (19 restaurants total) -- well below a typical urban ZIP -- alongside a -16.55% population growth rate and a BALANCED business/residential mix. Together this points to a market with few existing dining options generally, which supports -- but is not itself the reason for -- recommending a new item here; the recommendation is driven by the demographic and customer-segment analysis above.", "segWeekday": 56.58, "segWeekend": 67.78, "plainReason": "A saucier, boneless twist on the tenders above, giving families a second budget-friendly option without repeating the same flavor.", "plainConfidence": "We're fairly confident (4 out of 5) — same strong price fit and profit margin as the Bourbon Smoke Tenders.", "confidenceReasoning": "This item also earns a 4 out of 5 confidence score, for the same reasons as the Bourbon Smoke Tenders: the $4.99 price fits this area's typical household budget, and profit grows steadily from $4.73 to $17.08 over 9 months. It's a safe second option for the Value segment (56.58% weekday / 67.78% weekend crowd share) rather than a repeat of the same flavor.", "segmentFitNote": "Value is this ZIP's largest group by far (about 68% of households) -- this item gives them a second budget-friendly option without repeating the same flavor."}, {"name": "Nashville Hot Wings", "category": "Wings", "ingredients": "Bone-in chicken wings, cayenne-brown sugar dry rub, Nashville hot oil finish, pickle chips", "description": "Dry-rubbed bone-in wings finished with Nashville-style hot oil and pickle chips.", "priceBand": "Premium", "price": 9.99, "localStyleNote": "Nashville Hot Wings brings a spicier, bone-in variation to the Wings/Chicken category. Its Premium price point is argued through the profitability and demographic analysis elsewhere, not through category popularity.", "confidence": 4, "confidenceExplanation": "Confidence: 4/5. Premium tier is a bigger ask at this income level, but the very high margin on this item offsets that risk. This ZIP is a below-national-median-income, price-conscious market ($29,492 median household income, 15.5% unemployment) where Premium is an occasional, moderate step-up purchase. This item's own Gross Profit Margin is 71.0%. By this ZIP's commuter-driven crowd split, Premium draws an estimated 24.88% of weekday crowd and 24.68% of weekend crowd.", "reason": "Who it's for: the Premium segment (24.88% weekday / 24.68% weekend crowd share) -- an occasional, higher-price purchase rather than a daily one. What it does: a spicier, bone-in wing variant that trades on this ZIP's established local demand for fried chicken, positioned as a weekend/evening specialty rather than a routine order.", "demographicFit": "This ZIP's median household income is $29,492 and unemployment sits at 15.5% -- both well below national norms. A Premium-tier item is a moderate step up in price -- plausible as an occasional order (payday, a small celebration, a weekend treat) but not sustainable as a daily purchase at this income level. This tier only works if it is positioned as something special, not routine.", "residentialNote": "Supporting context for Nashville Hot Wings, not a direct input to its selection: this zip is classified 'SUBURBAN' with a 'BALANCED' business/residential mix and no tourist or office/school/hospital anchor. Given high delivery suitability for this item, that points to mostly local walk-in and delivery orders rather than office lunch traffic for this specific item.", "weekdayRole": "Evening occasion item. Premium draws an estimated 24.88% of weekday crowd here -- resident daytime traffic plus in-commuting workers (98.28% of residents leave the ZIP for work, so weekday volume leans on the ~3,700 workers who commute in or work locally).", "weekendRole": "Weekend feature/specialty item. Premium holds an estimated 24.68% of weekend crowd, once out-commuting residents are home and the mix reverts to this ZIP's resident household-income profile (median $29,492).", "familyFit": "Moderate", "premiumFit": "Moderate", "premiumAdjacentFit": "Already Premium tier; the next lever is a \"Reserve\" version with a dry-aged or specialty pepper mash (e.g. Carolina Reaper glaze) at a Premium Edge price, not a further increase to this item's own price.", "healthFit": "Fried, dry-rubbed, and oil-finished -- the most indulgent item on this list by cooking method. Judgment call from named ingredients; no nutrition data exists in either source file.", "delivery": "High", "portionsNote": "Standard individual portion, sized for an occasional, higher-price purchase rather than a routine order.", "ingredientCost": 2, "prepCost": 0.9, "theoreticalCost": 2.9, "profitDollar": 7.09, "profitPct": 70.97, "costPct": 29.03, "proj3": 13.47, "proj6": 25.59, "proj9": 48.62, "compCount": 4, "comp1": "KFC", "comp2": "Hot Wing House", "compMatchCriteria": "Category (Wings) matched to the two named comparable restaurants above. Cited as directional local-market evidence only, not as the basis for creating this item.", "compCuisineMatch": "This item's category (Wings) is represented among the named comparable restaurants above. No ZIP-wide restaurant-count percentage is used for this match.", "compDemoMatch": "100% -- both named comparable restaurants are real establishments located in this same ZIP code, per the source file's restaurant list.", "compEvidenceStrength": "Moderate -- based on the two named comparable restaurants above; no ZIP-wide restaurant-count statistic is used.", "compMenuEvidence": "KFC and Hot Wing House are named as comparable Wings-category restaurants in this ZIP. Cited as supporting directional evidence for local demand, not as the source of this recommendation.", "sentimentFit": "No review or rating data exists for this ZIP. As the closest proxy: dry-rubbed, hot-oil-finished bone-in wings are a spicier, more intense expression of the same Indulgent profile that dominates this ZIP (56.5% Indulgent-leaning).", "trendFit": "Presented as market context, not as the basis for this recommendation: this ZIP has a real, measured competitor density of 0.86 restaurants per 1,000 residents (19 restaurants total) -- well below a typical urban ZIP -- alongside a -16.55% population growth rate and a BALANCED business/residential mix. Together this points to a market with few existing dining options generally, which supports -- but is not itself the reason for -- recommending a new item here; the recommendation is driven by the demographic and customer-segment analysis above.", "segWeekday": 24.88, "segWeekend": 24.68, "plainReason": "A spicier wing option priced a bit higher, aimed at customers looking for an occasional treat rather than an everyday order.", "plainConfidence": "We're fairly confident (4 out of 5) — it costs more than this area's typical budget, but the very high profit margin makes up for that added risk.", "confidenceReasoning": "This item earns a 4 out of 5 confidence score. At $9.99, it's priced above what most households in this ZIP spend day-to-day, so it's positioned as an occasional treat rather than an everyday order -- that's the main reason it isn't a 5. But its profit growth is excellent, climbing from $13.47 in 3 months to $48.62 by 9 months, which offsets the pricing risk and keeps confidence high for the Premium segment (24.88% weekday / 24.68% weekend crowd share).", "segmentFitNote": "While Value (56.58% weekday / 67.78% weekend crowd share) is the largest group here, about 1 in 4 households (Premium, ~25%) can support a higher-priced specialty item -- this covers that smaller but real segment without competing with the everyday Value items (56.58% weekday / 67.78% weekend crowd share)."}, {"name": "Smokehouse Double Smash Burger", "category": "Fast Food", "ingredients": "Two smash-griddled beef patties, American cheese, brioche bun, smoky house sauce", "description": "Two smash-griddled beef patties with melted cheese and smoky house sauce on a toasted bun.", "priceBand": "Value", "price": 4.99, "localStyleNote": "The Smokehouse Double Smash Burger sits in the Fast Food category. This double-patty build was selected for the Value price tier and income fit described elsewhere.", "confidence": 3, "confidenceExplanation": "Confidence: 3/5. Right tier for the market, but ingredient cost (beef) keeps the margin thinner than the other Value items. This ZIP is a below-national-median-income, price-conscious market ($29,492 median household income, 15.5% unemployment) where Value is a routine, everyday-affordable price point. This item's own Gross Profit Margin is 28.9%. By this ZIP's commuter-driven crowd split, Value draws an estimated 56.58% of weekday crowd and 67.78% of weekend crowd.", "reason": "Who it's for: the Value segment (56.58% weekday / 67.78% weekend crowd share). What it does: a double-patty smash burger priced for routine ordering, built in the Fast Food style that is one of the two largest restaurant categories in this ZIP.", "demographicFit": "This ZIP's median household income is $29,492 and unemployment sits at 15.5% -- both well below national norms (roughly half the U.S. median household income). That is a price-conscious, budget-driven market. A Value-tier item is priced for routine, everyday ordering -- a direct match for this income level, not a stretch. Households here typically reserve restaurant spending for low-risk, frequent purchases rather than occasional splurges, which is exactly what this tier supports.", "residentialNote": "Supporting context for Smokehouse Double Smash Burger, not a direct input to its selection: this zip is classified 'SUBURBAN' with a 'BALANCED' business/residential mix and no tourist or office/school/hospital anchor. Given high delivery suitability for this item, that points to mostly local walk-in and delivery orders rather than office lunch traffic for this specific item.", "weekdayRole": "Lunch/dinner routine order. Value draws an estimated 56.58% of weekday crowd here -- resident daytime traffic plus in-commuting workers (98.28% of residents leave the ZIP for work, so weekday volume leans on the ~3,700 workers who commute in or work locally).", "weekendRole": "Steady weekend seller, same role. Value holds an estimated 67.78% of weekend crowd, once out-commuting residents are home and the mix reverts to this ZIP's resident household-income profile (median $29,492).", "familyFit": "Strong", "premiumFit": "Low (by design)", "premiumAdjacentFit": "Upgrade path: add a third smash patty, aged cheddar, and bacon jam, then reposition at the Premium tier -- a named ingredient/format upgrade, not just a price change.", "healthFit": "Griddled beef, melted cheese, sauced bun -- rich and indulgent, though griddled rather than deep-fried. Judgment call from named ingredients; no nutrition data exists in either source file.", "delivery": "High", "portionsNote": "Larger, shareable portion sized for this zip's target Value segment (56.58% weekday / 67.78% weekend crowd share) -- matching the area's average household size of 2.2, supporting frequent, everyday, high-value orders.", "ingredientCost": 3.05, "prepCost": 0.5, "theoreticalCost": 3.55, "profitDollar": 1.44, "profitPct": 28.86, "costPct": 71.14, "proj3": 2.74, "proj6": 5.21, "proj9": 9.9, "compCount": 5, "comp1": "Burger King", "comp2": "Dixie Queen Airways", "compMatchCriteria": "Category (Fast Food) matched to the two named comparable restaurants above. Cited as directional local-market evidence only, not as the basis for creating this item.", "compCuisineMatch": "This item's category (Fast Food) is represented among the named comparable restaurants above. No ZIP-wide restaurant-count percentage is used for this match.", "compDemoMatch": "100% -- both named comparable restaurants are real establishments located in this same ZIP code, per the source file's restaurant list.", "compEvidenceStrength": "Moderate-to-Strong -- based on the two named comparable restaurants above; no ZIP-wide restaurant-count statistic is used.", "compMenuEvidence": "Burger King and Dixie Queen Airways are named as comparable Fast Food-category restaurants in this ZIP. Cited as supporting directional evidence for local demand, not as the source of this recommendation.", "sentimentFit": "No review or rating data exists for this ZIP. As the closest proxy: a double smash-patty burger with melted cheese and house sauce is squarely Indulgent, matching this ZIP's 56.5% Indulgent-leaning profile.", "trendFit": "Presented as market context, not as the basis for this recommendation: this ZIP has a real, measured competitor density of 0.86 restaurants per 1,000 residents (19 restaurants total) -- well below a typical urban ZIP -- alongside a -16.55% population growth rate and a BALANCED business/residential mix. Together this points to a market with few existing dining options generally, which supports -- but is not itself the reason for -- recommending a new item here; the recommendation is driven by the demographic and customer-segment analysis above.", "segWeekday": 56.58, "segWeekend": 67.78, "plainReason": "A hearty double-patty burger priced for everyday family orders.", "plainConfidence": "We're moderately confident (3 out of 5) — priced right for the area, but beef cost cuts into the profit more than the other budget items.", "confidenceReasoning": "This item earns a 3 out of 5 confidence score, the lowest of the seven. The $4.99 price fits the Value segment (56.58% weekday / 67.78% weekend crowd share) well, but its profit growth is the slowest of the lineup, moving from just $2.74 in 3 months to $9.90 by 9 months. The slower profit growth, more than the pricing, is what holds this item's confidence back.", "segmentFitNote": "Value is this ZIP's largest group (about 68% of households), so this item is priced to match their everyday budget."}, {"name": "Cajun Loaded Fries", "category": "Fast Food", "ingredients": "Hand-cut fries, Cajun seasoning, cheese sauce, chipotle ranch", "description": "Hand-cut fries tossed in Cajun seasoning, topped with cheese sauce and chipotle ranch.", "priceBand": "Value", "price": 3.99, "localStyleNote": "Cajun Loaded Fries is a Fast Food-style shareable side. It was included for its strong margin and Value-tier income fit described elsewhere, separate from category-level reasoning.", "confidence": 5, "confidenceExplanation": "Confidence: 5/5. Best combination on the list: strong Value-tier fit, low ingredient cost, and a high margin. This ZIP is a below-national-median-income, price-conscious market ($29,492 median household income, 15.5% unemployment) where Value is a routine, everyday-affordable price point. This item's own Gross Profit Margin is 64.9%. By this ZIP's commuter-driven crowd split, Value draws an estimated 56.58% of weekday crowd and 67.78% of weekend crowd.", "reason": "Who it's for: the Value segment (56.58% weekday / 67.78% weekend crowd share). What it does: a shareable, Cajun-seasoned fries side that rounds out the Value-tier lineup with the strongest margin on this list, in an already-established Sides format.", "demographicFit": "This ZIP's median household income is $29,492 and unemployment sits at 15.5% -- both well below national norms (roughly half the U.S. median household income). That is a price-conscious, budget-driven market. A Value-tier item is priced for routine, everyday ordering -- a direct match for this income level, not a stretch. Households here typically reserve restaurant spending for low-risk, frequent purchases rather than occasional splurges, which is exactly what this tier supports.", "residentialNote": "Supporting context for Cajun Loaded Fries, not a direct input to its selection: this zip is classified 'SUBURBAN' with a 'BALANCED' business/residential mix and no tourist or office/school/hospital anchor. Given high delivery suitability for this item, that points to mostly local walk-in and delivery orders rather than office lunch traffic for this specific item.", "weekdayRole": "Lunch/dinner routine order. Value draws an estimated 56.58% of weekday crowd here -- resident daytime traffic plus in-commuting workers (98.28% of residents leave the ZIP for work, so weekday volume leans on the ~3,700 workers who commute in or work locally).", "weekendRole": "Steady weekend seller, same role. Value holds an estimated 67.78% of weekend crowd, once out-commuting residents are home and the mix reverts to this ZIP's resident household-income profile (median $29,492).", "familyFit": "Strong", "premiumFit": "Low (by design)", "premiumAdjacentFit": "Upgrade path: swap standard fries for duck-fat-fried fries and add smoked brisket or truffle oil, then reposition at the Premium tier.", "healthFit": "Fried potatoes with cheese sauce -- a classic indulgent side. Judgment call from named ingredients; no nutrition data exists in either source file.", "delivery": "High", "portionsNote": "Larger, shareable portion sized for this zip's target Value segment (56.58% weekday / 67.78% weekend crowd share) -- matching the area's average household size of 2.2, supporting frequent, everyday, high-value orders.", "ingredientCost": 0.9, "prepCost": 0.5, "theoreticalCost": 1.4, "profitDollar": 2.59, "profitPct": 64.91, "costPct": 35.09, "proj3": 4.92, "proj6": 9.35, "proj9": 17.77, "compCount": 5, "comp1": "Little Caesars", "comp2": "STUCKONASTICK", "compMatchCriteria": "Category (Fast Food) matched to the two named comparable restaurants above. Cited as directional local-market evidence only, not as the basis for creating this item.", "compCuisineMatch": "This item's category (Fast Food) is represented among the named comparable restaurants above. No ZIP-wide restaurant-count percentage is used for this match.", "compDemoMatch": "100% -- both named comparable restaurants are real establishments located in this same ZIP code, per the source file's restaurant list.", "compEvidenceStrength": "Moderate-to-Strong -- based on the two named comparable restaurants above; no ZIP-wide restaurant-count statistic is used.", "compMenuEvidence": "Little Caesars and STUCKONASTICK are named as comparable Fast Food-category restaurants in this ZIP. Cited as supporting directional evidence for local demand, not as the source of this recommendation.", "sentimentFit": "No review or rating data exists for this ZIP. As the closest proxy: Cajun-seasoned fries with cheese sauce and ranch are a classic Indulgent shareable side, matching this ZIP's 56.5% Indulgent-leaning profile.", "trendFit": "Presented as market context, not as the basis for this recommendation: this ZIP has a real, measured competitor density of 0.86 restaurants per 1,000 residents (19 restaurants total) -- well below a typical urban ZIP -- alongside a -16.55% population growth rate and a BALANCED business/residential mix. Together this points to a market with few existing dining options generally, which supports -- but is not itself the reason for -- recommending a new item here; the recommendation is driven by the demographic and customer-segment analysis above.", "segWeekday": 56.58, "segWeekend": 67.78, "plainReason": "A shareable, Cajun-spiced fries side that pairs naturally with the other budget-friendly items.", "plainConfidence": "This is our most confident pick (5 out of 5) — cheap to make, priced right for the area, and highly profitable.", "confidenceReasoning": "This item earns a 5 out of 5 confidence score, the highest of the seven. At $3.99, it's priced squarely for the Value segment (56.58% weekday / 67.78% weekend crowd share), and its profit grows quickly and consistently, from $4.92 in 3 months to $17.77 by 9 months. Strong pricing fit plus strong profit growth make this the safest bet on the menu.", "segmentFitNote": "Value is this ZIP's largest group (about 68% of households) -- this item is priced as a cheap, shareable add-on that fits how they typically order."}, {"name": "Peach Lemonade Float", "category": "Fast Food", "ingredients": "Fresh-squeezed lemonade, peach puree, vanilla soft-serve float", "description": "Fresh lemonade and peach puree topped with a scoop of vanilla soft-serve.", "priceBand": "Premium", "price": 6.99, "localStyleNote": "Peach Lemonade Float is a specialty dessert beverage, grouped under the Fast Food category. Its Premium price point and inclusion come from the profitability and demographic analysis elsewhere, not from beverage-category prevalence.", "confidence": 4, "confidenceExplanation": "Confidence: 4/5. Premium tier is a moderate stretch for this market, but the high margin and near-universal local beverage demand support it. This ZIP is a below-national-median-income, price-conscious market ($29,492 median household income, 15.5% unemployment) where Premium is an occasional, moderate step-up purchase. This item's own Gross Profit Margin is 73.5%. By this ZIP's commuter-driven crowd split, Premium draws an estimated 24.88% of weekday crowd and 24.68% of weekend crowd.", "reason": "Who it's for: the Premium segment (24.88% weekday / 24.68% weekend crowd share). What it does: a specialty dessert beverage (not a food item) that diversifies the menu beyond fried/savory options, positioned as an occasional treat purchase rather than a routine order.", "demographicFit": "This ZIP's median household income is $29,492 and unemployment sits at 15.5% -- both well below national norms. A Premium-tier item is a moderate step up in price -- plausible as an occasional order (payday, a small celebration, a weekend treat) but not sustainable as a daily purchase at this income level. This tier only works if it is positioned as something special, not routine.", "residentialNote": "Supporting context for Peach Lemonade Float, not a direct input to its selection: this zip is classified 'SUBURBAN' with a 'BALANCED' business/residential mix and no tourist or office/school/hospital anchor. Given medium delivery suitability for this item, that points to more dine-in/pickup orders than delivery-driven volume for this specific item.", "weekdayRole": "Evening occasion item. Premium draws an estimated 24.88% of weekday crowd here -- resident daytime traffic plus in-commuting workers (98.28% of residents leave the ZIP for work, so weekday volume leans on the ~3,700 workers who commute in or work locally).", "weekendRole": "Weekend feature/specialty item. Premium holds an estimated 24.68% of weekend crowd, once out-commuting residents are home and the mix reverts to this ZIP's resident household-income profile (median $29,492).", "familyFit": "Moderate", "premiumFit": "Moderate", "premiumAdjacentFit": "Upgrade path: swap standard vanilla soft-serve for a housemade bourbon-vanilla or salted-caramel version, then reposition at the Premium Edge tier as a specialty dessert offering.", "healthFit": "A sugar- and dairy-rich dessert beverage rather than a fried item -- indulgent via a different mechanism (soft-serve, sugar) than the rest of the list. Judgment call; no nutrition data exists in either source file.", "delivery": "Medium", "portionsNote": "Standard individual portion, sized for an occasional, higher-price purchase rather than a routine order.", "ingredientCost": 0.95, "prepCost": 0.9, "theoreticalCost": 1.85, "profitDollar": 5.14, "profitPct": 73.53, "costPct": 26.47, "proj3": 9.77, "proj6": 18.56, "proj9": 35.26, "compCount": 5, "comp1": "Burger King", "comp2": "Dixie Queen Airways", "compMatchCriteria": "Category (Fast Food) matched to the two named comparable restaurants above. Cited as directional local-market evidence only, not as the basis for creating this item.", "compCuisineMatch": "This item's category (Fast Food) is represented among the named comparable restaurants above. No ZIP-wide restaurant-count percentage is used for this match.", "compDemoMatch": "100% -- both named comparable restaurants are real establishments located in this same ZIP code, per the source file's restaurant list.", "compEvidenceStrength": "Moderate-to-Strong -- based on the two named comparable restaurants above; no ZIP-wide restaurant-count statistic is used.", "compMenuEvidence": "Burger King and Dixie Queen Airways are named as comparable Fast Food-category restaurants in this ZIP. Cited as supporting directional evidence for local demand, not as the source of this recommendation.", "sentimentFit": "No review or rating data exists for this ZIP. Unlike the fried/savory items on this list, this is a dessert-style beverage -- its Indulgent read comes from sugar and dairy richness (soft-serve float), not frying, but it still lands in the same 56.5% Indulgent-leaning local pattern rather than the 4.2% Healthy segment.", "trendFit": "Presented as market context, not as the basis for this recommendation: this ZIP has a real, measured competitor density of 0.86 restaurants per 1,000 residents (19 restaurants total) -- well below a typical urban ZIP -- alongside a -16.55% population growth rate and a BALANCED business/residential mix. Together this points to a market with few existing dining options generally, which supports -- but is not itself the reason for -- recommending a new item here; the recommendation is driven by the demographic and customer-segment analysis above.", "segWeekday": 24.88, "segWeekend": 24.68, "plainReason": "A specialty dessert drink for customers treating themselves on a payday or weekend outing.", "plainConfidence": "We're fairly confident (4 out of 5) — it's a bit of a stretch on price for this area, but strong profit margins and everyday demand for drinks support it.", "confidenceReasoning": "This item earns a 4 out of 5 confidence score. At $6.99, it sits a little above this area's typical everyday spending, so it's better suited to weekend or payday occasions than daily orders -- that's the main factor keeping it from a 5. Its profit growth is strong, though, rising from $9.77 in 3 months to $35.26 by 9 months, which keeps overall confidence high for the Premium segment (24.88% weekday / 24.68% weekend crowd share).", "segmentFitNote": "About 1 in 4 households here (Premium, ~25%) can support a higher-priced specialty drink -- this gives that segment something beyond the everyday Value menu (56.58% weekday / 67.78% weekend crowd share)."}, {"name": "Memphis Pulled Pork Plate", "category": "General", "ingredients": "Hickory-smoked pulled pork, bourbon-BBQ glaze, coleslaw, cornbread", "description": "Hickory-smoked pulled pork finished with a bourbon-BBQ glaze, served with coleslaw and cornbread.", "priceBand": "Premium Edge", "price": 12.99, "localStyleNote": "The Memphis Pulled Pork Plate falls under the General/BBQ category. Its Premium Edge tier is driven by income-affordability risk at this ZIP's below-national-median income (see Demographic Fit Reason), not by category scarcity or prevalence.", "confidence": 3, "confidenceExplanation": "Confidence: 3/5. The highest-risk tier for this income level, which caps confidence even though the margin itself is solid. This ZIP is a below-national-median-income, price-conscious market ($29,492 median household income, 15.5% unemployment) where Premium Edge is the highest-risk, treat-only price point. This item's own Gross Profit Margin is 69.6%. By this ZIP's commuter-driven crowd split, Premium Edge draws an estimated 18.54% of weekday crowd and 7.54% of weekend crowd.", "reason": "Who it's for: the Premium Edge segment (18.54% weekday / 7.54% weekend crowd share) -- deliberately the only item at this tier, given how far below the national median this ZIP's income sits. What it does: a smoked, composed BBQ plate that leans into Memphis's own barbecue identity rather than replicating the fried-chicken/fast-food items that dominate the rest of the list.", "demographicFit": "This ZIP's median household income is $29,492 and unemployment sits at 15.5% -- both well below national norms. A Premium Edge item is the highest-risk price point on this list given how far below the national median this ZIP's income sits. It only works as a deliberate, infrequent treat purchase -- which is exactly why only one of the seven recommendations sits at this tier.", "residentialNote": "Supporting context for Memphis Pulled Pork Plate, not a direct input to its selection: this zip is classified 'SUBURBAN' with a 'BALANCED' business/residential mix and no tourist or office/school/hospital anchor. Given medium delivery suitability for this item, that points to more dine-in/pickup orders than delivery-driven volume for this specific item.", "weekdayRole": "Evening occasion item. Premium Edge draws an estimated 18.54% of weekday crowd here -- resident daytime traffic plus in-commuting workers (98.28% of residents leave the ZIP for work, so weekday volume leans on the ~3,700 workers who commute in or work locally).", "weekendRole": "Weekend feature/specialty item. Premium Edge holds an estimated 7.54% of weekend crowd, once out-commuting residents are home and the mix reverts to this ZIP's resident household-income profile (median $29,492).", "familyFit": "Low (by design)", "premiumFit": "Strong", "premiumAdjacentFit": "Already top tier; the next lever is an add-on upcharge (extra pulled pork, a larger cornbread portion), not a further price increase on the base item.", "healthFit": "Smoked, not fried, but still a rich, sauced plate -- indulgent, not health-positioned. Judgment call from named ingredients and cooking method; no nutrition data exists in either source file.", "delivery": "Medium", "portionsNote": "A composed, smaller portion for this Premium Edge positioning -- value comes from craft and presentation, not size.", "ingredientCost": 2.45, "prepCost": 1.5, "theoreticalCost": 3.95, "profitDollar": 9.04, "profitPct": 69.59, "costPct": 30.41, "proj3": 17.18, "proj6": 32.64, "proj9": 62.02, "compCount": 10, "comp1": "It’s A Memphis Thang", "comp2": "Payne's Bar-B-Que", "compMatchCriteria": "Category (General/BBQ) matched to the two named comparable restaurants above. Cited as directional local-market evidence only, not as the basis for creating this item.", "compCuisineMatch": "This item's category (General/BBQ) is represented among the named comparable restaurants above. No ZIP-wide restaurant-count percentage is used for this match.", "compDemoMatch": "100% -- both named comparable restaurants are real establishments located in this same ZIP code, per the source file's restaurant list.", "compEvidenceStrength": "Strong -- based on the two named comparable restaurants above; no ZIP-wide restaurant-count statistic is used.", "compMenuEvidence": "It’s A Memphis Thang and Payne's Bar-B-Que are named as comparable General/BBQ-category restaurants in this ZIP. Cited as supporting directional evidence for local demand, not as the source of this recommendation.", "sentimentFit": "No review or rating data exists for this ZIP. As the closest proxy: this is smoked and glazed, not fried, but still a rich, sauced plate -- Indulgent, in line with this ZIP's 56.5% Indulgent-leaning profile, just via a different cooking method than the fried items on this list.", "trendFit": "Presented as market context, not as the basis for this recommendation: this ZIP has a real, measured competitor density of 0.86 restaurants per 1,000 residents (19 restaurants total) -- well below a typical urban ZIP -- alongside a -16.55% population growth rate and a BALANCED business/residential mix. Together this points to a market with few existing dining options generally, which supports -- but is not itself the reason for -- recommending a new item here; the recommendation is driven by the demographic and customer-segment analysis above.", "segWeekday": 18.54, "segWeekend": 7.54, "plainReason": "A higher-priced BBQ plate for the occasional special night out, leaning into Memphis's own barbecue tradition.", "plainConfidence": "We're moderately confident (3 out of 5) — our riskiest price point, since it's the most expensive item on the menu for a budget-conscious area, though it still earns strong profit.", "confidenceReasoning": "This item earns a 3 out of 5 confidence score. At $12.99, it's the most expensive item on the menu in a ZIP where the typical household budget is limited, which is the main reason its confidence is capped at 3 rather than higher. That said, its profit growth is the strongest of all seven items, climbing from $17.18 in 3 months to $62.02 by 9 months -- strong enough to justify keeping it on the menu as an occasional special, even with the pricing risk.", "segmentFitNote": "Only about 8% of households here fall into the highest-income Premium Edge tier, but that smaller group can support a higher-priced specialty plate like this on occasion."}];
+const REVMAP = {"Bourbon Smoke Tenders": {"category": "Wings", "price": 4.99, "comp1": "KFC", "comp2": "Church's Texas Chicken", "compCount": 4, "compMatchCriteria": "Category (Wings) matched to the two named comparable restaurants above. Cited as directional local-market evidence only, not as the basis for creating this item.", "compCuisineMatch": "This item's category (Wings) is represented among the named comparable restaurants above. No ZIP-wide restaurant-count percentage is used for this match.", "compDemoMatch": "100% -- both named comparable restaurants are real establishments located in this same ZIP code, per the source file's restaurant list.", "compPriceTierMatch": "Value", "compCategoryPresence": "Moderate", "compEvidenceStrength": "Moderate -- based on the two named comparable restaurants above; no ZIP-wide restaurant-count statistic is used.", "compMenuEvidence": "KFC and Church's Texas Chicken are named as comparable Wings-category restaurants in this ZIP. Cited as supporting directional evidence for local demand, not as the source of this recommendation.", "demographicFitReason": "This ZIP's median household income is $29,492 and unemployment sits at 15.5% -- both well below national norms (roughly half the U.S. median household income). That is a price-conscious, budget-driven market. A Value-tier item is priced for routine, everyday ordering -- a direct match for this income level, not a stretch. Households here typically reserve restaurant spending for low-risk, frequent purchases rather than occasional splurges, which is exactly what this tier supports.", "residentialNote": "Supporting context for Bourbon Smoke Tenders, not a direct input to its selection: this zip is classified 'SUBURBAN' with a 'BALANCED' business/residential mix and no tourist or office/school/hospital anchor. Given high delivery suitability for this item, that points to mostly local walk-in and delivery orders rather than office lunch traffic for this specific item.", "popRank": 2, "popScore": 4.7396, "compSalesCategory": "APPETIZER", "catDemandIndex": 1.1849, "catLevel": "High", "catMult": 1.05, "baseUnitsM": 40.15, "demandMult": 1, "baseProjUnits": 42.16, "steadyRev": 210.38, "factor6m": 5.4, "factorNext6m": 6, "factorNext9m": 9, "units6m": 227.66, "rev6m": 1136.02, "unitsNext6m": 252.96, "revNext6m": 1262.27, "unitsNext9m": 379.44, "revNext9m": 1893.41, "lunchShare": 0.55, "lunchMult": 0.98, "lunchPrice": 4.89, "lunchUnits": 26.16, "lunchRev": 127.92, "dinnerShare": 0.45, "dinnerMult": 1, "dinnerPrice": 4.99, "dinnerUnits": 21.41, "dinnerRev": 106.84, "wdShare": 0.455, "wdMult": 1.03, "wdPrice": 5.14, "wdUnits": 21.64, "wdRev": 111.23, "weShare": 0.545, "weMult": 1.03, "wePrice": 5.14, "weUnits": 25.93, "weRev": 133.28}, "Garlic Parmesan Boneless Bites": {"category": "Wings", "price": 4.99, "comp1": "KFC", "comp2": "Church's Texas Chicken", "compCount": 4, "compMatchCriteria": "Category (Wings) matched to the two named comparable restaurants above. Cited as directional local-market evidence only, not as the basis for creating this item.", "compCuisineMatch": "This item's category (Wings) is represented among the named comparable restaurants above. No ZIP-wide restaurant-count percentage is used for this match.", "compDemoMatch": "100% -- both named comparable restaurants are real establishments located in this same ZIP code, per the source file's restaurant list.", "compPriceTierMatch": "Value", "compCategoryPresence": "Moderate", "compEvidenceStrength": "Moderate -- based on the two named comparable restaurants above; no ZIP-wide restaurant-count statistic is used.", "compMenuEvidence": "KFC and Church's Texas Chicken are named as comparable Wings-category restaurants in this ZIP. Cited as supporting directional evidence for local demand, not as the source of this recommendation.", "demographicFitReason": "This ZIP's median household income is $29,492 and unemployment sits at 15.5% -- both well below national norms (roughly half the U.S. median household income). That is a price-conscious, budget-driven market. A Value-tier item is priced for routine, everyday ordering -- a direct match for this income level, not a stretch. Households here typically reserve restaurant spending for low-risk, frequent purchases rather than occasional splurges, which is exactly what this tier supports.", "residentialNote": "Supporting context for Garlic Parmesan Boneless Bites, not a direct input to its selection: this zip is classified 'SUBURBAN' with a 'BALANCED' business/residential mix and no tourist or office/school/hospital anchor. Given high delivery suitability for this item, that points to mostly local walk-in and delivery orders rather than office lunch traffic for this specific item.", "popRank": 2, "popScore": 4.7396, "compSalesCategory": "APPETIZER", "catDemandIndex": 1.1849, "catLevel": "High", "catMult": 1.05, "baseUnitsM": 40.15, "demandMult": 1, "baseProjUnits": 42.16, "steadyRev": 210.38, "factor6m": 5.4, "factorNext6m": 6, "factorNext9m": 9, "units6m": 227.66, "rev6m": 1136.02, "unitsNext6m": 252.96, "revNext6m": 1262.27, "unitsNext9m": 379.44, "revNext9m": 1893.41, "lunchShare": 0.55, "lunchMult": 0.98, "lunchPrice": 4.89, "lunchUnits": 26.16, "lunchRev": 127.92, "dinnerShare": 0.45, "dinnerMult": 1, "dinnerPrice": 4.99, "dinnerUnits": 21.41, "dinnerRev": 106.84, "wdShare": 0.455, "wdMult": 1.03, "wdPrice": 5.14, "wdUnits": 21.64, "wdRev": 111.23, "weShare": 0.545, "weMult": 1.03, "wePrice": 5.14, "weUnits": 25.93, "weRev": 133.28}, "Nashville Hot Wings": {"category": "Wings", "price": 9.99, "comp1": "KFC", "comp2": "Hot Wing House", "compCount": 4, "compMatchCriteria": "Category (Wings) matched to the two named comparable restaurants above. Cited as directional local-market evidence only, not as the basis for creating this item.", "compCuisineMatch": "This item's category (Wings) is represented among the named comparable restaurants above. No ZIP-wide restaurant-count percentage is used for this match.", "compDemoMatch": "100% -- both named comparable restaurants are real establishments located in this same ZIP code, per the source file's restaurant list.", "compPriceTierMatch": "Premium", "compCategoryPresence": "Moderate", "compEvidenceStrength": "Moderate -- based on the two named comparable restaurants above; no ZIP-wide restaurant-count statistic is used.", "compMenuEvidence": "KFC and Hot Wing House are named as comparable Wings-category restaurants in this ZIP. Cited as supporting directional evidence for local demand, not as the source of this recommendation.", "demographicFitReason": "This ZIP's median household income is $29,492 and unemployment sits at 15.5% -- both well below national norms. A Premium-tier item is a moderate step up in price -- plausible as an occasional order (payday, a small celebration, a weekend treat) but not sustainable as a daily purchase at this income level. This tier only works if it is positioned as something special, not routine.", "residentialNote": "Supporting context for Nashville Hot Wings, not a direct input to its selection: this zip is classified 'SUBURBAN' with a 'BALANCED' business/residential mix and no tourist or office/school/hospital anchor. Given high delivery suitability for this item, that points to mostly local walk-in and delivery orders rather than office lunch traffic for this specific item.", "popRank": 2, "popScore": 4.7396, "compSalesCategory": "APPETIZER", "catDemandIndex": 1.1849, "catLevel": "High", "catMult": 1.05, "baseUnitsM": 33.04, "demandMult": 1, "baseProjUnits": 34.69, "steadyRev": 346.55, "factor6m": 5.4, "factorNext6m": 6, "factorNext9m": 9, "units6m": 187.33, "rev6m": 1871.43, "unitsNext6m": 208.14, "revNext6m": 2079.32, "unitsNext9m": 312.21, "revNext9m": 3118.98, "lunchShare": 0.25, "lunchMult": 1.03, "lunchPrice": 10.29, "lunchUnits": 9.79, "lunchRev": 100.74, "dinnerShare": 0.75, "dinnerMult": 1.05, "dinnerPrice": 10.49, "dinnerUnits": 29.36, "dinnerRev": 307.99, "wdShare": 0.502, "wdMult": 1, "wdPrice": 9.99, "wdUnits": 19.65, "wdRev": 196.3, "weShare": 0.498, "weMult": 1, "wePrice": 9.99, "weUnits": 19.5, "weRev": 194.81}, "Smokehouse Double Smash Burger": {"category": "Fast Food", "price": 4.99, "comp1": "Burger King", "comp2": "Dixie Queen Airways", "compCount": 5, "compMatchCriteria": "Category (Fast Food) matched to the two named comparable restaurants above. Cited as directional local-market evidence only, not as the basis for creating this item.", "compCuisineMatch": "This item's category (Fast Food) is represented among the named comparable restaurants above. No ZIP-wide restaurant-count percentage is used for this match.", "compDemoMatch": "100% -- both named comparable restaurants are real establishments located in this same ZIP code, per the source file's restaurant list.", "compPriceTierMatch": "Value", "compCategoryPresence": "Moderate-to-Strong", "compEvidenceStrength": "Moderate-to-Strong -- based on the two named comparable restaurants above; no ZIP-wide restaurant-count statistic is used.", "compMenuEvidence": "Burger King and Dixie Queen Airways are named as comparable Fast Food-category restaurants in this ZIP. Cited as supporting directional evidence for local demand, not as the source of this recommendation.", "demographicFitReason": "This ZIP's median household income is $29,492 and unemployment sits at 15.5% -- both well below national norms (roughly half the U.S. median household income). That is a price-conscious, budget-driven market. A Value-tier item is priced for routine, everyday ordering -- a direct match for this income level, not a stretch. Households here typically reserve restaurant spending for low-risk, frequent purchases rather than occasional splurges, which is exactly what this tier supports.", "residentialNote": "Supporting context for Smokehouse Double Smash Burger, not a direct input to its selection: this zip is classified 'SUBURBAN' with a 'BALANCED' business/residential mix and no tourist or office/school/hospital anchor. Given high delivery suitability for this item, that points to mostly local walk-in and delivery orders rather than office lunch traffic for this specific item.", "popRank": 1, "popScore": 9.6057, "compSalesCategory": "BURGER", "catDemandIndex": 3.2019, "catLevel": "Very High", "catMult": 1.1, "baseUnitsM": 40.15, "demandMult": 1, "baseProjUnits": 44.17, "steadyRev": 220.41, "factor6m": 5.4, "factorNext6m": 6, "factorNext9m": 9, "units6m": 238.52, "rev6m": 1190.21, "unitsNext6m": 265.02, "revNext6m": 1322.45, "unitsNext9m": 397.53, "revNext9m": 1983.67, "lunchShare": 0.55, "lunchMult": 0.98, "lunchPrice": 4.89, "lunchUnits": 70.7, "lunchRev": 345.72, "dinnerShare": 0.45, "dinnerMult": 1, "dinnerPrice": 4.99, "dinnerUnits": 57.85, "dinnerRev": 288.67, "wdShare": 0.455, "wdMult": 1.03, "wdPrice": 5.14, "wdUnits": 58.49, "wdRev": 300.64, "weShare": 0.545, "weMult": 1.03, "wePrice": 5.14, "weUnits": 70.06, "weRev": 360.11}, "Cajun Loaded Fries": {"category": "Fast Food", "price": 3.99, "comp1": "Little Caesars", "comp2": "STUCKONASTICK", "compCount": 5, "compMatchCriteria": "Category (Fast Food) matched to the two named comparable restaurants above. Cited as directional local-market evidence only, not as the basis for creating this item.", "compCuisineMatch": "This item's category (Fast Food) is represented among the named comparable restaurants above. No ZIP-wide restaurant-count percentage is used for this match.", "compDemoMatch": "100% -- both named comparable restaurants are real establishments located in this same ZIP code, per the source file's restaurant list.", "compPriceTierMatch": "Value", "compCategoryPresence": "Moderate-to-Strong", "compEvidenceStrength": "Moderate-to-Strong -- based on the two named comparable restaurants above; no ZIP-wide restaurant-count statistic is used.", "compMenuEvidence": "Little Caesars and STUCKONASTICK are named as comparable Fast Food-category restaurants in this ZIP. Cited as supporting directional evidence for local demand, not as the source of this recommendation.", "demographicFitReason": "This ZIP's median household income is $29,492 and unemployment sits at 15.5% -- both well below national norms (roughly half the U.S. median household income). That is a price-conscious, budget-driven market. A Value-tier item is priced for routine, everyday ordering -- a direct match for this income level, not a stretch. Households here typically reserve restaurant spending for low-risk, frequent purchases rather than occasional splurges, which is exactly what this tier supports.", "residentialNote": "Supporting context for Cajun Loaded Fries, not a direct input to its selection: this zip is classified 'SUBURBAN' with a 'BALANCED' business/residential mix and no tourist or office/school/hospital anchor. Given high delivery suitability for this item, that points to mostly local walk-in and delivery orders rather than office lunch traffic for this specific item.", "popRank": 7, "popScore": 2.3115, "compSalesCategory": "SIDE / OTHER", "catDemandIndex": 0.4623, "catLevel": "Low", "catMult": 0.95, "baseUnitsM": 40.15, "demandMult": 1, "baseProjUnits": 38.14, "steadyRev": 152.18, "factor6m": 5.4, "factorNext6m": 6, "factorNext9m": 9, "units6m": 205.96, "rev6m": 821.78, "unitsNext6m": 228.84, "revNext6m": 913.07, "unitsNext9m": 343.26, "revNext9m": 1369.61, "lunchShare": 0.55, "lunchMult": 0.98, "lunchPrice": 3.91, "lunchUnits": 10.21, "lunchRev": 39.92, "dinnerShare": 0.45, "dinnerMult": 1, "dinnerPrice": 3.99, "dinnerUnits": 8.35, "dinnerRev": 33.32, "wdShare": 0.455, "wdMult": 1.03, "wdPrice": 4.11, "wdUnits": 8.44, "wdRev": 34.69, "weShare": 0.545, "weMult": 1.03, "wePrice": 4.11, "weUnits": 10.12, "weRev": 41.59}, "Peach Lemonade Float": {"category": "Fast Food", "price": 6.99, "comp1": "Burger King", "comp2": "Dixie Queen Airways", "compCount": 5, "compMatchCriteria": "Category (Fast Food) matched to the two named comparable restaurants above. Cited as directional local-market evidence only, not as the basis for creating this item.", "compCuisineMatch": "This item's category (Fast Food) is represented among the named comparable restaurants above. No ZIP-wide restaurant-count percentage is used for this match.", "compDemoMatch": "100% -- both named comparable restaurants are real establishments located in this same ZIP code, per the source file's restaurant list.", "compPriceTierMatch": "Premium", "compCategoryPresence": "Moderate-to-Strong", "compEvidenceStrength": "Moderate-to-Strong -- based on the two named comparable restaurants above; no ZIP-wide restaurant-count statistic is used.", "compMenuEvidence": "Burger King and Dixie Queen Airways are named as comparable Fast Food-category restaurants in this ZIP. Cited as supporting directional evidence for local demand, not as the source of this recommendation.", "demographicFitReason": "This ZIP's median household income is $29,492 and unemployment sits at 15.5% -- both well below national norms. A Premium-tier item is a moderate step up in price -- plausible as an occasional order (payday, a small celebration, a weekend treat) but not sustainable as a daily purchase at this income level. This tier only works if it is positioned as something special, not routine.", "residentialNote": "Supporting context for Peach Lemonade Float, not a direct input to its selection: this zip is classified 'SUBURBAN' with a 'BALANCED' business/residential mix and no tourist or office/school/hospital anchor. Given medium delivery suitability for this item, that points to more dine-in/pickup orders than delivery-driven volume for this specific item.", "popRank": 5, "popScore": 4, "compSalesCategory": "No direct match in reference sales data (beverage/dessert) -- using dataset average", "catDemandIndex": 1, "catLevel": "High", "catMult": 1.05, "baseUnitsM": 33.04, "demandMult": 1, "baseProjUnits": 34.69, "steadyRev": 242.48, "factor6m": 5.4, "factorNext6m": 6, "factorNext9m": 9, "units6m": 187.33, "rev6m": 1309.44, "unitsNext6m": 208.14, "revNext6m": 1454.9, "unitsNext9m": 312.21, "revNext9m": 2182.35, "lunchShare": 0.25, "lunchMult": 1.03, "lunchPrice": 7.2, "lunchUnits": 8.26, "lunchRev": 59.47, "dinnerShare": 0.75, "dinnerMult": 1.05, "dinnerPrice": 7.34, "dinnerUnits": 24.78, "dinnerRev": 181.89, "wdShare": 0.502, "wdMult": 1, "wdPrice": 6.99, "wdUnits": 16.59, "wdRev": 115.96, "weShare": 0.498, "weMult": 1, "wePrice": 6.99, "weUnits": 16.45, "weRev": 114.99}, "Memphis Pulled Pork Plate": {"category": "General", "price": 12.99, "comp1": "It\u2019s A Memphis Thang", "comp2": "Payne's Bar-B-Que", "compCount": 10, "compMatchCriteria": "Category (General/BBQ) matched to the two named comparable restaurants above. Cited as directional local-market evidence only, not as the basis for creating this item.", "compCuisineMatch": "This item's category (General/BBQ) is represented among the named comparable restaurants above. No ZIP-wide restaurant-count percentage is used for this match.", "compDemoMatch": "100% -- both named comparable restaurants are real establishments located in this same ZIP code, per the source file's restaurant list.", "compPriceTierMatch": "Premium Edge", "compCategoryPresence": "Strong", "compEvidenceStrength": "Strong -- based on the two named comparable restaurants above; no ZIP-wide restaurant-count statistic is used.", "compMenuEvidence": "It\u2019s A Memphis Thang and Payne's Bar-B-Que are named as comparable General/BBQ-category restaurants in this ZIP. Cited as supporting directional evidence for local demand, not as the source of this recommendation.", "demographicFitReason": "This ZIP's median household income is $29,492 and unemployment sits at 15.5% -- both well below national norms. A Premium Edge item is the highest-risk price point on this list given how far below the national median this ZIP's income sits. It only works as a deliberate, infrequent treat purchase -- which is exactly why only one of the seven recommendations sits at this tier.", "residentialNote": "Supporting context for Memphis Pulled Pork Plate, not a direct input to its selection: this zip is classified 'SUBURBAN' with a 'BALANCED' business/residential mix and no tourist or office/school/hospital anchor. Given medium delivery suitability for this item, that points to more dine-in/pickup orders than delivery-driven volume for this specific item.", "popRank": 6, "popScore": 2.7573, "compSalesCategory": "ENTREE", "catDemandIndex": 0.9191, "catLevel": "Medium", "catMult": 1, "baseUnitsM": 39.65, "demandMult": 1, "baseProjUnits": 39.65, "steadyRev": 515.05, "factor6m": 5.4, "factorNext6m": 6, "factorNext9m": 9, "units6m": 214.11, "rev6m": 2781.29, "unitsNext6m": 237.9, "revNext6m": 3090.32, "unitsNext9m": 356.85, "revNext9m": 4635.48, "lunchShare": 0.15, "lunchMult": 1.03, "lunchPrice": 13.38, "lunchUnits": 5.47, "lunchRev": 73.19, "dinnerShare": 0.85, "dinnerMult": 1.05, "dinnerPrice": 13.64, "dinnerUnits": 30.97, "dinnerRev": 422.43, "wdShare": 0.7109, "wdMult": 0.97, "wdPrice": 12.6, "wdUnits": 25.91, "wdRev": 326.47, "weShare": 0.2891, "weMult": 1, "wePrice": 12.99, "weUnits": 10.53, "weRev": 136.78}};
+
+const ETHNICITY = {
+ "ethnicity": [
+  {
+   "name": "Black or African American",
+   "pct": 89.74,
+   "count": "21,270 of 23,702"
+  },
+  {
+   "name": "White",
+   "pct": 4.73,
+   "count": "1,122 of 23,702"
+  },
+  {
+   "name": "Hispanic or Latino",
+   "pct": 3.09,
+   "count": "733 of 23,702",
+   "note": "Ethnicity, overlaps race categories"
+  },
+  {
+   "name": "Some Other Race",
+   "pct": 1.88,
+   "count": "445 of 23,702"
+  },
+  {
+   "name": "American Indian / Alaska Native",
+   "pct": 0.36,
+   "count": "86 of 23,702"
+  },
+  {
+   "name": "Asian",
+   "pct": 0.15,
+   "count": "36 of 23,702"
+  },
+  {
+   "name": "Native Hawaiian / Other Pacific Islander",
+   "pct": 0.04,
+   "count": "10 of 23,702"
+  }
+ ],
+ "incomeLimitation": "The Census Bureau does not publish a reliable median-household-income-by-race breakdown at the ZCTA (ZIP-code) level for this ZIP. ZIP 38114 is 89.74% one race (Black/African American); every other group is under 5% of the population (Asian is roughly 36 people), so ACS subgroup income estimates at this geography carry margins of error larger than the estimate itself, or are suppressed outright. Any ZIP-level number presented as median income by ethnicity for 38114 would not be a real, defensible figure.",
+ "memphisContext": {
+  "black_pct": 62.91,
+  "black_note": "395,742 residents; ACS 2019-2023 5-Year Estimates",
+  "white_pct": 22.4,
+  "hispanic_pct": 10.4,
+  "citywide_income": 51736,
+  "zip_income": 29492,
+  "nationalNote": "National 2024 median household income by race (Census Bureau report P60-286): Black householders about $56,000, White about $83,000, Hispanic about $68,000, Asian about $115,000 -- shown only to describe the general national pattern. Applying national figures to Memphis specifically would not be defensible, so no Memphis-by-race dollar figures are presented."
+ },
+ "source": "U.S. Census Bureau, 2020 Demographic & Housing Characteristics (DHC) file for ZIP 38114; City of Memphis figures from ACS 2019-2023 5-Year Estimates."
+};
+const REVMETA = {
+ "assumptions": [
+  [
+   "Weekday days per month",
+   "22",
+   "Standard assumption used to spread monthly units across weekdays."
+  ],
+  [
+   "Weekend days per month",
+   "8",
+   "Standard assumption used to spread monthly units across weekend days."
+  ],
+  [
+   "Market capture rate",
+   "0.05%",
+   "Documented assumption -- no POS history exists for these new items; scales the real Category Volume Index to an absolute unit baseline."
+  ],
+  [
+   "Intro-period volume factor (Months 1-2)",
+   "70% of steady-state",
+   "New items ramp up -- Months 1-2 run at 70% of steady-state volume, Month 3 onward at 100%."
+  ],
+  [
+   "Weekday daytime population",
+   "16,170",
+   "Residents present + in-commuting workers, from the real commuter inflow/outflow analysis."
+  ],
+  [
+   "Weekend population",
+   "22,112",
+   "Full resident population (TOTAL_POPULATION field)."
+  ]
+ ],
+ "demandLevels": [
+  [
+   "Strong",
+   "> 1.05",
+   "1.05"
+  ],
+  [
+   "Moderate",
+   "0.95 - 1.05",
+   "1.00"
+  ],
+  [
+   "Weak",
+   "< 0.95",
+   "0.95"
+  ]
+ ],
+ "compositeFormula": "Composite Index = 40% Population Growth factor + 35% Competition Favorability factor + 25% Labor Force Participation factor, each expressed relative to its national benchmark (1.00 = matches benchmark).",
+ "compositeParts": [
+  [
+   "Population Growth factor",
+   "1 + (actual rate - benchmark rate)",
+   "Actual -16.55% vs. 0% national benchmark"
+  ],
+  [
+   "Competition Favorability",
+   "MIN(1.3, benchmark density / actual density)",
+   "Actual 0.86/1,000 vs. 2.00/1,000 national benchmark -- capped at 1.3 so a very low-competition ZIP cannot dominate the composite"
+  ],
+  [
+   "Labor Force factor",
+   "actual rate / benchmark rate",
+   "Actual 56.4% vs. 63% national benchmark"
+  ]
+ ],
+ "compositeResult": {
+  "index": 1.0127,
+  "level": "Moderate",
+  "multiplier": 1.0
+ },
+ "categoryLevels": [
+  [
+   "Very High",
+   ">= 2.00",
+   "1.10"
+  ],
+  [
+   "High",
+   "1.00 - 1.99",
+   "1.05"
+  ],
+  [
+   "Medium",
+   "0.60 - 0.99",
+   "1.00"
+  ],
+  [
+   "Low",
+   "0.30 - 0.59",
+   "0.95"
+  ],
+  [
+   "Very Low",
+   "< 0.30",
+   "0.90"
+  ]
+ ],
+ "daypartShares": [
+  [
+   "Value (routine order)",
+   "55% / 45%",
+   "Value items are described as routine lunch/dinner orders -- assumed roughly even, tilted slightly to lunch"
+  ],
+  [
+   "Premium (evening occasion)",
+   "25% / 75%",
+   "Premium items are described as evening-occasion items -- assumed dinner-weighted"
+  ],
+  [
+   "Premium Edge (evening occasion)",
+   "15% / 85%",
+   "The most evening-occasion-weighted tier on this list"
+  ],
+  [
+   "Breakfast (new daypart)",
+   "90% / 10%",
+   "A breakfast item is overwhelmingly a first-meal/lunch-bucket order, not a dinner order"
+  ]
+ ],
+ "daypartNote": "Neither source file contains a lunch/dinner (time-of-day) breakdown of sales for these items -- the comparable-restaurant sales file has no daypart field, and these are new items with no POS history. Lunch/Dinner Unit Share is assigned by the item's established occasion role, not measured from data. This is stated plainly rather than presented as a calculation.",
+ "periodFactors": [
+  ["6M Factor (Months 1-6)", "5.4", "Month 1 + Month 2 at the 70% ramp-up factor (0.7 + 0.7) + 4 steady-state months (4 x 1.0) = 5.4"],
+  ["Next 6M Factor (Months 7-12)", "6.0", "6 full steady-state months -- no ramp-up, the item is already established by month 7"],
+  ["Next 9M Factor (Months 13-21)", "9.0", "9 full steady-state months -- no additional growth or decay defined beyond the initial ramp"]
+ ],
+ "periodPipelineNote": "Demand Multiplier and Category Multiplier are applied once, inside Base Projected Units (Monthly). The three Period Factors above are pure month-count / ramp-up multipliers on top of that -- they carry no additional demand or category adjustment, so nothing gets double-counted.",
+ "categoryVolumeTable": [
+  ["BURGER", "697.71", "3.2019", "24"],
+  ["BREAKFAST", "341.27", "1.5662", "90"],
+  ["APPETIZER", "258.20", "1.1849", "111"],
+  ["ENTREE", "200.28", "0.9191", "50"],
+  ["SAND / WRAP", "172.55", "0.7919", "146"],
+  ["SIDE / OTHER", "100.74", "0.4623", "87"],
+  ["SALAD", "75.14", "0.3449", "76"],
+  ["SOUP", "70.66", "0.3243", "35"],
+  ["BREAKFAST SIDE", "44.57", "0.2045", "63"]
+ ],
+ "categoryVolumeNote": "Volume Index = this category's average units-sold-per-menu-item in the real comparable-restaurant sales file (grizzlies_sales_data_CLEANED.csv), divided by the average across all categories in that same file. It is a RELATIVE popularity multiplier across categories only -- not an absolute count, since that comparable file is arena concessions (a different customer base and footfall than a neighborhood restaurant)."
+};
+
+function num(v){ return typeof v === 'string' ? parseFloat(v.replace(/,/g,'')) : v; }
+function money(v){ const n = num(v); if (isNaN(n)) return '—'; return (n<0?'-$':'$') + Math.abs(n).toLocaleString('en-US',{maximumFractionDigits:0}); }
+function moneyExact(v){ const n = num(v); if (isNaN(n)) return '—'; return '$' + n.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}); }
+function pct(v,d){ const n = num(v); if (isNaN(n)) return '—'; return n.toFixed(d===undefined?1:d) + '%'; }
+function pct100(v,d){ return pct(num(v)*100, d); }
+
+function tbl(headers, rows){
+  let h = '<table class="cm-table"><thead><tr>' + headers.map(x=>'<th>'+x+'</th>').join('') + '</tr></thead><tbody>';
+  rows.forEach(r => {
+    const isHl = String(r[0]).toLowerCase().indexOf('interpretation')===0 || String(r[0]).toLowerCase().indexOf('rationale')===0;
+    h += '<tr' + (isHl?' class="tbl-hl"':'') + '>' + r.map((c,i)=>{
+      const cls = (i>0 && !isHl && /[\d$%]/.test(String(c)[0]||'')) ? ' class="tbl-num"' : '';
+      return '<td'+cls+(isHl && i===0?' colspan="1"':(isHl?' style="display:none"':''))+'>'+c+'</td>';
+    }).join('') + '</tr>';
+  });
+  return h + '</tbody></table>';
+}
+
+function renderSolve(steps){
+  return '<div class="cm-solve">' + steps.map((s,i) =>
+    '<div class="cm-solve-step"><span class="ss-n">'+(i+1)+'</span><span class="ss-formula">'+s.formula+'</span>' +
+    '<div class="ss-sub">'+s.sub+'</div><div class="ss-result">'+s.result+'</div>' +
+    (s.note ? '<div class="ss-note">'+s.note+'</div>' : '') + '</div>'
+  ).join('') + '</div>';
+}
+const zipStats = [
+  {label:'Total Population', value:'22,112', sub:'ZCTA 38114, Memphis TN', evidence:'The total number of people living in ZIP 38114 per real Census-style data (TOTAL_POPULATION field). This is the resident base every other metric is measured against.'},
+  {label:'Median Household Income', value:'$29,492', sub:'\u2248 half the U.S. median', evidence:'The midpoint household income for this ZIP: half of households earn more, half earn less. At $29,492, this sits well below the national median household income, which is why the menu skews toward the Value price tier (67.78% of weekend crowd, the largest of the three segments).'},
+  {label:'Median Age', value:'41.4 yrs', sub:'Real Census-style data', evidence:'The midpoint age of residents in this ZIP &mdash; half the population is older than 41.4, half younger.'},
+  {label:'Average Household Size', value:'2.2 people', sub:'Drives portion sizing', evidence:'The average number of people living in one household in this ZIP. This directly informed portion-size decisions for Value-tier items (56.58% weekday / 67.78% weekend crowd share), which are sized as larger, shareable portions.'},
+  {label:'Employment Rate', value:'84.5%', sub:'Of the local labor force', evidence:'The share of the local labor force that is currently employed (EMPLOYMENT_RATE field). The remaining 15.5% is the unemployment rate.'},
+  {label:'Unemployment Rate', value:'15.5%', sub:'Nearly double the national average', evidence:'The share of the local labor force that is without work but seeking it (UNEMPLOYMENT_RATE field). This elevated rate reinforces the price-conscious, Value-tier positioning (67.78% of weekend crowd) used across most recommended items.'},
+  {label:'Area Type', value:'Suburban', sub:'Balanced business/residential mix', evidence:'A real classification field (AREA_TYPE) describing this ZIP as suburban, with a BALANCED business-vs-residential index (0.0019) &mdash; meaning it is neither a dense office/commercial core nor a purely residential subdivision.'},
+  {label:'Restaurant Density', value:'0.86 / 1,000', sub:'19 restaurants &middot; 19.7 sq mi', evidence:'19 real restaurants currently operate in this ZIP, giving a density of roughly 0.86 restaurants per 1,000 residents (or about 0.97 per square mile across the ZIP&#39;s 19.7 sq mi land area) &mdash; a below-average density that points to limited existing dining options.'},
+  {label:'Income Level', value:'Below-Median', sub:'Business interpretation', evidence:'A business interpretation, not a raw data field: at $29,492 median household income against a national median roughly double that, this ZIP is classified as a below-median-income, price-conscious market.'},
+  {label:'Population Growth Rate', value:'\u221216.55%', sub:'Real, measured decline', evidence:'The measured change in this ZIP&#39;s population over the tracked period (population_growth_rate field). A negative figure indicates the resident population has been shrinking, which tempers long-term growth expectations for this location.'},
+  {label:'Total Households', value:'10,025', sub:'Basis for segmentation', evidence:'The total number of households in this ZIP (TOTAL_HOUSEHOLDS field). This is the denominator used to calculate the Value / Premium / Premium Edge segmentation percentages.'},
+  {label:'Labor Force Participation', value:'56.4%', sub:'Below ~63% national rate', evidence:'The share of residents aged 16+ who are either working or actively looking for work (LABOR_FORCE_PARTICIPATION_RATE field). At 56.4%, this sits below the roughly 63% national rate, suggesting more local daytime residential traffic and less office-driven lunch rush.'},
+];
+
+
+const overlay = document.getElementById('modalOverlay');
+const modalBox = document.getElementById('modalBox');
+function closeModal(){
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeModal(); });
+document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape'){ closeModal(); closeConcept(); } });
+
+function openEvidence(title, bodyHtml){
+  modalBox.className = 'modal-box';
+  modalBox.innerHTML = `
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div class="modal-eyebrow">Evidence &amp; Definition</div>
+    <h3>${title}</h3>
+    <p>${bodyHtml}</p>
+  `;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function openIncomeLimitation(){
+  openEvidence('Why Income Isn\u2019t Broken Out by Ethnicity', ETHNICITY.incomeLimitation + ' The closest reliable comparison is city-of-Memphis-level income (a larger, published geography) \u2014 shown for context only, it describes the city, not this specific ZIP. ' + ETHNICITY.memphisContext.nationalNote);
+}
+
+function badgeClass(band){
+  if(band === 'Value') return 'family';
+  if(band === 'Premium') return 'premium';
+  return 'edge';
+}
+
+// ================= AGGREGATE TOTALS =================
+function menuProfitTotals(){
+  let g=0,c=0,cst=0,p3=0,p6=0,p9=0;
+  ITEMS.forEach(it=>{ g+=it.profitDollar; cst+=it.theoreticalCost; p3+=num(it.proj3); p6+=num(it.proj6); p9+=num(it.proj9); });
+  const avgProfitPct = ITEMS.reduce((a,it)=>a+it.profitPct,0)/ITEMS.length;
+  return {g, p3, p6, p9, avgProfitPct};
+}
+function revenueTotals(){
+  let first6=0,next6=0,next9=0,units6=0,unitsNext6=0,unitsNext9=0;
+  Object.values(REVMAP).forEach(r=>{ first6+=r.rev6m; next6+=r.revNext6m; next9+=r.revNext9m; units6+=r.units6m; unitsNext6+=r.unitsNext6m; unitsNext9+=r.unitsNext9m; });
+  return {first6, next6, next9, units6, unitsNext6, unitsNext9};
+}
+
+// ================= CONCEPT DEFINITIONS =================
+const CONCEPTS = {
+
+  menuProfit: {
+    title: 'Menu Profitability', eyebrow: 'Concept Dashboard · Total Menu', hasPeriods:true,
+    periodList: [{key:'3',label:'3-Mo'},{key:'6',label:'6-Mo'},{key:'9',label:'9-Mo'}],
+    purpose: 'Profitability is the one place in this report driven by fixed formulas — every other judgment call (cuisine fit, segment fit, confidence score) is a qualitative business read, not a calculation. Each item\u2019s Gross Profit compounds forward by a consistent \u00d71.9 per quarter (a volume-growth assumption reverse-engineered from the source file, holding exactly for all 7 items). The totals below are the sum of that projection across all 7 recommended items.',
+    terms: [
+      ['Ingredient Cost','The raw cost of the food items that go into one serving.'],
+      ['Prep Cost','The added cost of labor, cooking, and handling to turn raw ingredients into the finished dish.'],
+      ['Theoretical Cost','Ingredient Cost + Prep Cost — what the dish should cost to make under normal conditions.'],
+      ['Selling Price','The recommended menu price charged to the customer.'],
+      ['Gross Profit','Selling Price \u2212 Theoretical Cost, per unit sold.'],
+      ['Food Cost %','Theoretical Cost \u00f7 Selling Price \u00d7 100 — the share of price consumed by making the dish.'],
+      ['Profitability %','Gross Profit \u00f7 Selling Price \u00d7 100 — always equals 100% \u2212 Food Cost %.'],
+      ['3 / 6 / 9-Month Profit','Each period\u2019s figure is the prior period\u2019s profit multiplied by a consistent 1.9\u00d7 growth factor, starting from Gross Profit. This holds exactly for every item in the source file.'],
+      ['What is the 1.9\u00d7?','For every $1 of profit a dish makes today, the model assumes 90% quarter-over-quarter growth — a volume-growth assumption baked into the source file, not independently calculated by this report.']
+    ],
+    formulas: [
+      ['FORMULA','Gross Profit = Selling Price \u2212 Theoretical Cost'],
+      ['FORMULA','Food Cost % = (Theoretical Cost \u00f7 Selling Price) \u00d7 100'],
+      ['FORMULA','Profitability % = (Gross Profit \u00f7 Selling Price) \u00d7 100'],
+      ['FORMULA','3-Month Profit = Gross Profit \u00d7 1.9'],
+      ['FORMULA','6-Month Profit = 3-Month Profit \u00d7 1.9'],
+      ['FORMULA','9-Month Profit = 6-Month Profit \u00d7 1.9']
+    ],
+    whyNotes: [
+      'Why \u00d71.9 and not a different number: comparing all 7 recommended items shows the exact same ratio every time between one period\u2019s profit and the next. Rather than invent a new assumption, this report simply reports the ratio that is already, consistently, present in the source file.',
+      'Why this differs from the Revenue Forecast (Section 07): this figure is a per-unit profit-dollar projection built purely from the formula above. The Revenue Forecast is a separate, unit-volume-based model driven by the real Category Volume Index and this ZIP\u2019s Market Demand Composite Index — the two are not meant to reconcile to the same number.'
+    ],
+    kpis(period){
+      const t = menuProfitTotals();
+      const byKey = {3:t.p3, 6:t.p6, 9:t.p9};
+      return [
+        {label:'Total Menu Gross Profit', val: moneyExact(t.g), sub:'sum of 7 items, per unit sold'},
+        {key:'3', label:'3-Month Total', val: moneyExact(t.p3), sub:'\u00d71.9 from Gross Profit'},
+        {key:'6', label:'6-Month Total', val: moneyExact(t.p6), sub:'\u00d71.9 from 3-Month'},
+        {key:'9', label:'9-Month Total', val: moneyExact(t.p9), sub:'\u00d71.9 from 6-Month', accent:true},
+        {label:'Avg. Profitability %', val: pct(t.avgProfitPct), sub:'across all 7 items'}
+      ];
+    },
+    solve(period){
+      const t = menuProfitTotals();
+      const rows = ITEMS.map(it=>[it.name, moneyExact(it.profitDollar), moneyExact(it.proj3), moneyExact(it.proj6), moneyExact(it.proj9)]);
+      rows.push(['<strong>Menu Total</strong>', '<strong>'+moneyExact(t.g)+'</strong>', '<strong>'+moneyExact(t.p3)+'</strong>', '<strong>'+moneyExact(t.p6)+'</strong>', '<strong>'+moneyExact(t.p9)+'</strong>']);
+      return tbl(['Item','Gross Profit','3-Mo','6-Mo','9-Mo'], rows);
+    },
+    example(){
+      const it = ITEMS[0];
+      return tbl(['Step','Value'], [
+        ['Item (worked example)', it.name],
+        ['Ingredient Cost + Prep Cost', moneyExact(it.ingredientCost)+' + '+moneyExact(it.prepCost)+' = '+moneyExact(it.theoreticalCost)],
+        ['Gross Profit', moneyExact(it.price)+' \u2212 '+moneyExact(it.theoreticalCost)+' = '+moneyExact(it.profitDollar)],
+        ['Profitability %', it.profitPct+'%'],
+        ['3-Month Profitability Value', moneyExact(it.profitDollar)+' \u00d7 1.9 = '+moneyExact(it.proj3)],
+        ['6-Month Profitability Value', moneyExact(it.proj3)+' \u00d7 1.9 = '+moneyExact(it.proj6)],
+        ['9-Month Profitability Value', moneyExact(it.proj6)+' \u00d7 1.9 = '+moneyExact(it.proj9)]
+      ]);
+    }
+  },
+
+  itemProfit: {
+    title: 'Item Profitability', eyebrow: 'Concept Dashboard · Single Item', hasPeriods:false,
+    purpose: 'This item\u2019s own cost, price, and profit — and how its Gross Profit compounds forward \u00d71.9 per quarter to build the 3/6/9-Month Profit figures.',
+    terms: [
+      ['Theoretical Cost','Ingredient Cost + Prep Cost.'],
+      ['Gross Profit','Selling Price \u2212 Theoretical Cost.'],
+      ['Profitability %','Gross Profit \u00f7 Selling Price \u00d7 100.'],
+      ['3 / 6 / 9-Month Profit','Gross Profit, then each period \u00d7 1.9 from the one before.']
+    ],
+    formulas: [['FORMULA','Profitability % = (Selling Price \u2212 Theoretical Cost) \u00f7 Selling Price \u00d7 100']],
+    kpis(it){
+      return [
+        {label:'Selling Price', val: moneyExact(it.price), sub:''},
+        {label:'Theoretical Cost', val: moneyExact(it.theoreticalCost), sub: moneyExact(it.ingredientCost)+' ingr. + '+moneyExact(it.prepCost)+' prep'},
+        {label:'Gross Profit', val: moneyExact(it.profitDollar), sub: it.profitPct+'% profitability'},
+        {label:'9-Month Total', val: moneyExact(it.proj9), sub:'\u00d71.9 compounding', accent:true}
+      ];
+    },
+    solve(it){
+      return [
+        {formula:'Theoretical Cost = Ingredient Cost + Prep Cost', sub: moneyExact(it.ingredientCost)+' + '+moneyExact(it.prepCost), result: moneyExact(it.theoreticalCost)},
+        {formula:'Gross Profit = Selling Price \u2212 Theoretical Cost', sub: moneyExact(it.price)+' \u2212 '+moneyExact(it.theoreticalCost), result: moneyExact(it.profitDollar)},
+        {formula:'Profitability % = Gross Profit \u00f7 Selling Price \u00d7 100', sub: moneyExact(it.profitDollar)+' \u00f7 '+moneyExact(it.price)+' \u00d7 100', result: it.profitPct+'%'},
+        {formula:'3-Month Profit = Gross Profit \u00d7 1.9', sub: moneyExact(it.profitDollar)+' \u00d7 1.9', result: moneyExact(it.proj3)},
+        {formula:'6-Month Profit = 3-Month Profit \u00d7 1.9', sub: moneyExact(it.proj3)+' \u00d7 1.9', result: moneyExact(it.proj6)},
+        {formula:'9-Month Profit = 6-Month Profit \u00d7 1.9', sub: moneyExact(it.proj6)+' \u00d7 1.9', result: moneyExact(it.proj9)}
+      ];
+    }
+  },
+
+  revenue: {
+    title: 'Revenue Forecast', eyebrow: 'Concept Dashboard \u00b7 Total Menu', hasPeriods:true,
+    periodList: [{key:'first6',label:'Current 6-Mo'},{key:'next6',label:'Next 6-Mo'},{key:'next9',label:'Next 9-Mo'}],
+    purpose: 'Revenue is projected from the real Category Volume Index (comparable-restaurant POS sales), this ZIP\u2019s own Market Demand Composite Index, and a documented new-item ramp-up assumption. It is a separate model from the Profitability figures in Section 04 \u2014 the two are not designed to reconcile to the same number.',
+    terms: [
+      ['Base Units (Monthly)','A monthly unit baseline for this item, scaled from the real Category Volume Index using the documented market-capture-rate assumption \u2014 since no POS history exists yet for these new items.'],
+      ['Demand Multiplier (ZIP-wide)','A 0.95\u20131.05 multiplier from this ZIP\u2019s Market Demand Composite Index (population growth, competitor density, labor-force participation, each weighted against a national benchmark).'],
+      ['Category Multiplier','A 0.90\u20131.10 multiplier bucketed from this item\u2019s real Category Volume Index (how fast this category sells relative to the average category in the comparable-sales file).'],
+      ['Base Projected Units (Monthly)','Base Units \u00d7 Demand Multiplier \u00d7 Category Multiplier \u2014 the expected steady-state monthly volume, before any ramp-up or month-count factor is applied.'],
+      ['Period Forecast Factor','Applied AFTER Base Projected Units, never re-applying Demand or Category Multiplier \u2014 a pure month-count / ramp-up factor for each forecast window (see table below).'],
+      ['6M Revenue (Months 1\u20136)','Base Projected Units \u00d7 5.4 (the 6M Factor, which bakes in the Months 1\u20132 ramp-up) \u00d7 Selling Price.'],
+      ['Next 6M Revenue (Months 7\u201312)','Base Projected Units \u00d7 6.0 \u00d7 Selling Price \u2014 the item is fully ramped up by this point.'],
+      ['Next 9M Revenue (Months 13\u201321)','Base Projected Units \u00d7 9.0 \u00d7 Selling Price.']
+    ],
+    formulas: [
+      ['FORMULA','Base Projected Units = Base Units \u00d7 Demand Multiplier \u00d7 Category Multiplier'],
+      ['FORMULA','Period Units = Base Projected Units \u00d7 Period Forecast Factor'],
+      ['FORMULA','Period Revenue = Period Units \u00d7 Selling Price']
+    ],
+    whyNotes: [
+      'Why the 6M Factor is 5.4, not 6.0: '+REVMETA.periodFactors[0][2]+' New items ramp up \u2014 assuming full steady-state volume from day one would overstate early revenue.',
+      'Why the pipeline order matters: '+REVMETA.periodPipelineNote,
+      'Why the Demand Multiplier is capped between 0.95 and 1.10: '+REVMETA.compositeFormula+' This keeps any single ZIP-level factor from dominating the forecast \u2014 this ZIP\u2019s computed composite index is '+REVMETA.compositeResult.index.toFixed(4)+', landing in the "'+REVMETA.compositeResult.level+'" band (multiplier '+REVMETA.compositeResult.multiplier.toFixed(2)+'\u00d7).',
+      'Why Category Multiplier varies by item: '+REVMETA.categoryVolumeNote
+    ],
+    kpis(period){
+      const t = revenueTotals();
+      return [
+        {key:'first6', label:'Current 6-Mo Revenue', val: money(t.first6), sub:'Months 1\u20136, all 7 items'},
+        {key:'next6', label:'Next 6-Mo Revenue', val: money(t.next6), sub:'Months 7\u201312'},
+        {key:'next9', label:'Next 9-Mo Revenue', val: money(t.next9), sub:'Months 13\u201321', accent:true}
+      ];
+    },
+    multiplierTables(){
+      return [
+        {title:'Market Demand Level \u2192 Demand Multiplier (this ZIP)', headers:['Level','Composite Index Threshold','Demand Multiplier'], rows:
+          REVMETA.demandLevels.map(r=>[r[0]+(r[0]===REVMETA.compositeResult.level?' \u2190 this ZIP':''), r[1], r[2]])},
+        {title:'Category Demand Level \u2192 Category Multiplier', headers:['Level','Volume Index Threshold','Category Multiplier'], rows: REVMETA.categoryLevels},
+        {title:'Category Volume Index \u2014 Real Comparable-Sales Data', headers:['Category','Avg Units Sold / Item','Volume Index','Items in Sample'], rows: REVMETA.categoryVolumeTable},
+        {title:'Period Forecast Factor', headers:['Period','Factor','Basis'], rows: REVMETA.periodFactors}
+      ];
+    },
+    solve(period){
+      const rows = ITEMS.map(it=>{
+        const r = REVMAP[it.name];
+        return [it.name, money(r.rev6m), money(r.revNext6m), money(r.revNext9m)];
+      });
+      const t = revenueTotals();
+      rows.push(['<strong>Menu Total</strong>','<strong>'+money(t.first6)+'</strong>','<strong>'+money(t.next6)+'</strong>','<strong>'+money(t.next9)+'</strong>']);
+      return tbl(['Item','Current 6-Mo','Next 6-Mo','Next 9-Mo'], rows);
+    },
+    example(){
+      const it = ITEMS[0];
+      const r = REVMAP[it.name];
+      return tbl(['Step','Value'], [
+        ['Item (worked example)', it.name],
+        ['Base Units \u00d7 Demand \u00d7 Category', r.baseUnitsM+' \u00d7 '+r.demandMult.toFixed(2)+' \u00d7 '+r.catMult.toFixed(2)+' = '+r.baseProjUnits.toFixed(2)+' units/mo (Base Projected Units)'],
+        ['6M Units (\u00d7 Factor 5.4)', r.baseProjUnits.toFixed(2)+' \u00d7 5.4 = '+r.units6m.toFixed(2)+' units'],
+        ['6M Revenue', r.units6m.toFixed(2)+' \u00d7 '+moneyExact(it.price)+' = '+money(r.rev6m)],
+        ['Next 6M Revenue (\u00d7 Factor 6.0)', r.baseProjUnits.toFixed(2)+' \u00d7 6.0 \u00d7 '+moneyExact(it.price)+' = '+money(r.revNext6m)],
+        ['Next 9M Revenue (\u00d7 Factor 9.0)', r.baseProjUnits.toFixed(2)+' \u00d7 9.0 \u00d7 '+moneyExact(it.price)+' = '+money(r.revNext9m)]
+      ]);
+    }
+  },
+
+  itemRevenue: {
+    title: 'Item Revenue Forecast', eyebrow: 'Concept Dashboard \u00b7 Single Item', hasPeriods:false,
+    purpose: 'How this item\u2019s monthly unit volume and revenue were built, from the real Category Volume Index through to the 6- and 9-month totals \u2014 plus the documented Lunch/Dinner and Weekday/Weekend occasion split.',
+    terms: [
+      ['Category Demand Level', 'This item\u2019s Comparable Sales Category, bucketed from the real Category Volume Index into Very Low\u2013Very High.'],
+      ['Occasion Split','Lunch/Dinner and Weekday/Weekend shares are assigned from this item\u2019s established occasion role (see Section 09), not measured from POS data \u2014 no daypart field exists in the comparable-sales file.']
+    ],
+    formulas: [['FORMULA','Occasion Revenue = Estimated Units (that occasion) \u00d7 Occasion Price']],
+    kpis(it){
+      const r = REVMAP[it.name];
+      return [
+        {label:'Base Units / Mo', val: r.baseUnitsM, sub:'from Category Volume Index'},
+        {label:'Category (Sales Model)', val: r.compSalesCategory+' ('+r.catLevel+')', sub:'\u00d7'+r.catMult.toFixed(2)+' multiplier'},
+        {label:'Base Projected Units / Mo', val: r.baseProjUnits.toFixed(1), sub:'steady-state'},
+        {label:'Current 6-Mo Revenue', val: money(r.rev6m), sub: r.units6m.toFixed(0)+' units'},
+        {label:'Next 6-Mo Revenue', val: money(r.revNext6m), sub: r.unitsNext6m.toFixed(0)+' units'},
+        {label:'Next 9-Mo Revenue', val: money(r.revNext9m), sub: r.unitsNext9m.toFixed(0)+' units', accent:true}
+      ];
+    },
+    multiplierTables(it){
+      const r = REVMAP[it.name];
+      return [
+        {title:'Demand Multiplier \u2014 Where This ZIP Falls', headers:['Level','Composite Index Threshold','Demand Multiplier'], rows:
+          REVMETA.demandLevels.map(row=>[row[0]+(row[0]===REVMETA.compositeResult.level?' \u2190 this ZIP ('+REVMETA.compositeResult.index.toFixed(4)+')':''), row[1], row[2]])},
+        {title:'Category Multiplier \u2014 Where '+r.compSalesCategory+' Falls', headers:['Level','Volume Index Threshold','Category Multiplier'], rows:
+          REVMETA.categoryLevels.map(row=>[row[0]+(row[0]===r.catLevel?' \u2190 this item ('+r.catDemandIndex.toFixed(4)+')':''), row[1], row[2]])}
+      ];
+    },
+    solve(it){
+      const r = REVMAP[it.name];
+      return [
+        {formula:'Base Projected Units = Base Units \u00d7 Demand Multiplier \u00d7 Category Multiplier', sub: r.baseUnitsM+' \u00d7 '+r.demandMult.toFixed(2)+' \u00d7 '+r.catMult.toFixed(2), result: r.baseProjUnits.toFixed(2)+' units/mo'},
+        {formula:'6M Units = Base Projected Units \u00d7 6M Factor (5.4)', sub: r.baseProjUnits.toFixed(2)+' \u00d7 5.4', result: r.units6m.toFixed(2)+' units', note:'The 5.4 factor already bakes in the Months 1\u20132 ramp-up (2 \u00d7 0.7) + 4 steady-state months.'},
+        {formula:'6M Revenue = 6M Units \u00d7 Selling Price', sub: r.units6m.toFixed(2)+' \u00d7 '+moneyExact(it.price), result: money(r.rev6m)},
+        {formula:'Next 6M Units = Base Projected Units \u00d7 6.0', sub: r.baseProjUnits.toFixed(2)+' \u00d7 6.0', result: r.unitsNext6m.toFixed(2)+' units'},
+        {formula:'Next 6M Revenue = Next 6M Units \u00d7 Selling Price', sub: r.unitsNext6m.toFixed(2)+' \u00d7 '+moneyExact(it.price), result: money(r.revNext6m)},
+        {formula:'Next 9M Units = Base Projected Units \u00d7 9.0', sub: r.baseProjUnits.toFixed(2)+' \u00d7 9.0', result: r.unitsNext9m.toFixed(2)+' units'},
+        {formula:'Next 9M Revenue = Next 9M Units \u00d7 Selling Price', sub: r.unitsNext9m.toFixed(2)+' \u00d7 '+moneyExact(it.price), result: money(r.revNext9m)}
+      ];
+    },
+    occasionTable(it){
+      const r = REVMAP[it.name];
+      return tbl(['Occasion','Unit Share','Demand Mult.','Price','Est. Units/Mo','Est. Revenue/Mo'], [
+        ['Lunch', pct100(r.lunchShare), r.lunchMult.toFixed(2), moneyExact(r.lunchPrice), r.lunchUnits.toFixed(1), moneyExact(r.lunchRev)],
+        ['Dinner', pct100(r.dinnerShare), r.dinnerMult.toFixed(2), moneyExact(r.dinnerPrice), r.dinnerUnits.toFixed(1), moneyExact(r.dinnerRev)],
+        ['Weekday', pct100(r.wdShare), r.wdMult.toFixed(2), moneyExact(r.wdPrice), r.wdUnits.toFixed(1), moneyExact(r.wdRev)],
+        ['Weekend', pct100(r.weShare), r.weMult.toFixed(2), moneyExact(r.wePrice), r.weUnits.toFixed(1), moneyExact(r.weRev)]
+      ]);
+    }
+  },
+
+  recommendation: {
+    title: 'Menu Item Recommendation', eyebrow: 'Concept Dashboard · New Item', hasPeriods:false,
+    kpis(it){
+      return [
+        {label:'Recommendation', val:'ADD', sub:'', accent:true},
+        {label:'Confidence', val: it.confidence+' / 5', sub:'qualitative judgment'},
+        {label:'Profitability', val: it.profitPct+'%', sub: 'Food Cost '+it.costPct+'%'},
+        {label:'Price Tier', val: it.priceBand, sub: it.segWeekday+'% WD / '+it.segWeekend+'% WE crowd'}
+      ];
+    }
+  }
+};
+
+function closeConcept(){
+  document.getElementById('cmModal').classList.remove('open');
+  document.getElementById('cmBackdrop').classList.remove('open');
+}
+document.getElementById('cmBackdrop').addEventListener('click', closeConcept);
+
+let cmState = {key:null, period:null, itemIdx:null};
+
+function renderConceptShell(html){
+  document.getElementById('cmModal').innerHTML = html;
+  document.getElementById('cmModal').classList.add('open');
+  document.getElementById('cmBackdrop').classList.add('open');
+  document.getElementById('cmModal').scrollTop = 0;
+  const cb = document.getElementById('cmModal').querySelector('.cm-close');
+  if(cb) cb.addEventListener('click', closeConcept);
+  const fc = document.getElementById('cmModal').querySelector('.cm-foot-close');
+  if(fc) fc.addEventListener('click', closeConcept);
+}
+
+function openMenuProfitConcept(period){
+  cmState = {key:'menuProfit', period: period || '9'};
+  const c = CONCEPTS.menuProfit;
+  const kpis = c.kpis(cmState.period);
+  let html = '<div class="cm-close">\u2715</div><div class="cm-head"><span class="cm-eyebrow">'+c.eyebrow+'</span><h3>'+c.title+'</h3></div><div class="cm-body">';
+  html += '<div class="cm-tabs">'+c.periodList.map(p=>'<div class="cm-tab'+(cmState.period===p.key?' active':'')+'" onclick="openMenuProfitConcept(\''+p.key+'\')">'+p.label+'</div>').join('')+'</div>';
+  html += '<div class="cm-kpi-row">'+kpis.map(k=>'<div class="cm-kpi'+(k.accent?' accent':'')+'"><span class="cm-kpi-label">'+k.label+'</span><div class="cm-kpi-val">'+k.val+'</div>'+(k.sub?'<div class="cm-kpi-sub">'+k.sub+'</div>':'')+'</div>').join('')+'</div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Business Purpose</div><p class="cm-purpose">'+c.purpose+'</p></div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Terminology</div>'+tbl(['Term','Definition'], c.terms)+'</div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Formulas</div>'+c.formulas.map(f=>'<div class="cm-formula-box"><span class="cm-f-tag">'+f[0]+'</span>'+f[1]+'</div>').join('')+'</div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Why These Numbers</div>'+c.whyNotes.map(n=>'<div class="cm-why">'+n+'</div>').join('')+'</div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Every Item, This Period</div>'+c.solve(cmState.period)+'</div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Worked Example</div><div class="cm-example"><span class="cm-example-tag">Live Calculation</span>'+c.example()+'</div></div>';
+  html += '</div><div class="cm-foot"><div class="cm-foot-close">Close</div></div>';
+  renderConceptShell(html);
+}
+
+function openItemProfitConcept(idx){
+  const it = ITEMS[idx];
+  const c = CONCEPTS.itemProfit;
+  const kpis = c.kpis(it);
+  let html = '<div class="cm-close">\u2715</div><div class="cm-head"><span class="cm-eyebrow">'+c.eyebrow+'</span><h3>'+c.title+'</h3><div class="cm-item-name">'+it.name+' \u00b7 '+it.category+'</div></div><div class="cm-body">';
+  html += '<div class="cm-kpi-row">'+kpis.map(k=>'<div class="cm-kpi'+(k.accent?' accent':'')+'"><span class="cm-kpi-label">'+k.label+'</span><div class="cm-kpi-val">'+k.val+'</div>'+(k.sub?'<div class="cm-kpi-sub">'+k.sub+'</div>':'')+'</div>').join('')+'</div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Business Purpose</div><p class="cm-purpose">'+c.purpose+'</p></div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Terminology</div>'+tbl(['Term','Definition'], c.terms)+'</div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Step-by-Step Calculation</div>'+renderSolve(c.solve(it))+'</div>';
+  html += '</div><div class="cm-foot"><div class="cm-foot-close">Close</div></div>';
+  renderConceptShell(html);
+}
+
+function openRevenueConcept(period){
+  cmState = {key:'revenue', period: period || 'first6'};
+  const c = CONCEPTS.revenue;
+  const kpis = c.kpis(cmState.period);
+  let html = '<div class="cm-close">\u2715</div><div class="cm-head"><span class="cm-eyebrow">'+c.eyebrow+'</span><h3>'+c.title+'</h3></div><div class="cm-body">';
+  html += '<div class="cm-tabs">'+c.periodList.map(p=>'<div class="cm-tab'+(cmState.period===p.key?' active':'')+'" onclick="openRevenueConcept(\''+p.key+'\')">'+p.label+'</div>').join('')+'</div>';
+  html += '<div class="cm-kpi-row">'+kpis.map(k=>'<div class="cm-kpi'+(k.accent?' accent':'')+'"><span class="cm-kpi-label">'+k.label+'</span><div class="cm-kpi-val">'+k.val+'</div>'+(k.sub?'<div class="cm-kpi-sub">'+k.sub+'</div>':'')+'</div>').join('')+'</div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Business Purpose</div><p class="cm-purpose">'+c.purpose+'</p></div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Terminology</div>'+tbl(['Term','Definition'], c.terms)+'</div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Formulas</div>'+c.formulas.map(f=>'<div class="cm-formula-box"><span class="cm-f-tag">'+f[0]+'</span>'+f[1]+'</div>').join('')+'</div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Why These Numbers</div>'+c.whyNotes.map(n=>'<div class="cm-why">'+n+'</div>').join('')+'</div>';
+  c.multiplierTables().forEach(mt=>{ html += '<div class="cm-section"><div class="cm-section-title">'+mt.title+'</div>'+tbl(mt.headers, mt.rows)+'</div>'; });
+  html += '<div class="cm-section"><div class="cm-section-title">Every Item</div>'+c.solve(cmState.period)+'</div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Worked Example</div><div class="cm-example"><span class="cm-example-tag">Live Calculation</span>'+c.example()+'</div></div>';
+  html += '</div><div class="cm-foot"><div class="cm-foot-close">Close</div></div>';
+  renderConceptShell(html);
+}
+
+function openItemRevenueConcept(idx){
+  const it = ITEMS[idx];
+  const c = CONCEPTS.itemRevenue;
+  const kpis = c.kpis(it);
+  let html = '<div class="cm-close">\u2715</div><div class="cm-head"><span class="cm-eyebrow">'+c.eyebrow+'</span><h3>'+c.title+'</h3><div class="cm-item-name">'+it.name+' \u00b7 '+it.category+'</div></div><div class="cm-body">';
+  html += '<div class="cm-kpi-row">'+kpis.map(k=>'<div class="cm-kpi'+(k.accent?' accent':'')+'"><span class="cm-kpi-label">'+k.label+'</span><div class="cm-kpi-val">'+k.val+'</div>'+(k.sub?'<div class="cm-kpi-sub">'+k.sub+'</div>':'')+'</div>').join('')+'</div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Business Purpose</div><p class="cm-purpose">'+c.purpose+'</p></div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Terminology</div>'+tbl(['Term','Definition'], c.terms)+'</div>';
+  html += '<div class="cm-section"><div class="cm-section-title">Step-by-Step Calculation</div>'+renderSolve(c.solve(it))+'</div>';
+  c.multiplierTables(it).forEach(mt=>{ html += '<div class="cm-section"><div class="cm-section-title">'+mt.title+'</div>'+tbl(mt.headers, mt.rows)+'</div>'; });
+  html += '<div class="cm-section"><div class="cm-section-title">Lunch / Dinner &amp; Weekday / Weekend Split</div>'+c.occasionTable(it)+'</div>';
+  html += '</div><div class="cm-foot"><div class="cm-foot-close">Close</div></div>';
+  renderConceptShell(html);
+}
+
+// ================= REDESIGNED MENU ITEM POPUP (concept-modal style) =================
+function openMenuItem(idx){
+  const it = ITEMS[idx];
+  const r = REVMAP[it.name] || {};
+  const c = CONCEPTS.recommendation;
+  const kpis = c.kpis(it);
+
+  let html = '<div class="cm-close">\u2715</div>';
+  html += '<div class="cm-head"><span class="cm-eyebrow">'+c.eyebrow+'</span><h3>'+it.name+'</h3><div class="cm-item-name">'+it.category+' \u00b7 '+moneyExact(it.price)+' \u00b7 '+it.priceBand+' tier</div></div>';
+  html += '<div class="cm-body">';
+
+  html += '<div class="cm-kpi-row">'+kpis.map(k=>'<div class="cm-kpi'+(k.accent?' accent':'')+'"><span class="cm-kpi-label">'+k.label+'</span><div class="cm-kpi-val">'+(k.label==='Recommendation'?'<span class="cm-badge add">ADD</span>':k.val)+'</div>'+(k.sub?'<div class="cm-kpi-sub">'+k.sub+'</div>':'')+'</div>').join('')+'</div>';
+
+  html += '<div class="cm-section"><div class="cm-section-title">Why This Decision</div>'+tbl(['Factor','Result','Meaning'], [
+    ['Demographic Fit', it.demographicFit.split('.')[0]+'.', 'This ZIP\u2019s income profile supports this item\u2019s price tier.'],
+    ['Segment Fit', it.priceBand+' \u2014 '+it.segWeekday+'% WD / '+it.segWeekend+'% WE', it.segmentFitNote],
+    ['Cuisine / Comparable Match', (r.comp1||'')+' &amp; '+(r.comp2||''), 'Same ZIP, same category ('+(r.compSalesCategory||it.category)+') \u2014 validation only, not the basis for creating this item.'],
+    ['Market Opportunity', 'Below-average restaurant density', it.residentialNote.split(':').slice(1).join(':').split('.')[0]+'.'],
+    ['Local Commuter Data', (r.baseUnitsM||'')+' base units/mo', 'Weekday volume blends this ZIP\u2019s resident population with the real commuter inflow/outflow analysis (16,170 estimated weekday daytime population, incl. in-commuting workers); weekend volume uses the full resident population (22,112). Feeds this item\u2019s Base Units and revenue forecast \u2014 not the ADD/REVISE call itself.'],
+    ['Ethnicity', 'Not used as a decision input', 'This ZIP is 89.74% Black/African American (see Section 06). Race/ethnicity plays no role in scoring or selecting this item \u2014 recommendations are driven by income-bracket and category-fit data only. Shown for market context, not as an input here.'],
+    ['Confidence Score', it.confidence+' / 5', it.plainConfidence]
+  ])+'</div>';
+
+  html += '<div class="cm-section"><div class="cm-section-title">Concept Overview</div>'+tbl(['Field','Detail'], [
+    ['Description', it.description],
+    ['Ingredients', it.ingredients],
+    ['Weekday Role', it.weekdayRole],
+    ['Weekend Role', it.weekendRole],
+    ['Delivery Suitability', it.delivery],
+    ['Portioning', it.portionsNote]
+  ])+'</div>';
+
+  html += '<div class="cm-section"><div class="cm-section-title">Profitability</div><div class="cm-kpi-row">'+
+    ['Ingredient Cost:'+moneyExact(it.ingredientCost), 'Prep Cost:'+moneyExact(it.prepCost), 'Theoretical Cost:'+moneyExact(it.theoreticalCost),
+     'Gross Profit:'+moneyExact(it.profitDollar), 'Profitability %:'+it.profitPct+'%', '9-Month Profit:'+moneyExact(it.proj9)]
+    .map(x=>{ const [l,v]=x.split(':'); return '<div class="cm-kpi"><span class="cm-kpi-label">'+l+'</span><div class="cm-kpi-val" style="font-size:17px;">'+v+'</div></div>'; }).join('') +
+    '</div><span class="calc-link" onclick="closeConcept();setTimeout(()=>openItemProfitConcept('+idx+'),180);">See full cost breakdown &amp; formula \u2192</span></div>';
+
+  if(r.rev6m !== undefined){
+    html += '<div class="cm-section"><div class="cm-section-title">Revenue Forecast</div><div class="cm-kpi-row">'+
+      [['Current 6-Mo Revenue', money(r.rev6m)], ['Next 6-Mo Revenue', money(r.revNext6m)], ['Next 9-Mo Revenue', money(r.revNext9m)]]
+      .map(x=>'<div class="cm-kpi accent"><span class="cm-kpi-label">'+x[0]+'</span><div class="cm-kpi-val">'+x[1]+'</div></div>').join('') +
+      '</div><span class="calc-link" onclick="closeConcept();setTimeout(()=>openItemRevenueConcept('+idx+'),180);">How revenue is calculated \u2192</span></div>';
+  }
+
+  html += '<div class="cm-section"><div class="cm-section-title">Comparable Restaurants \u2014 Validation Only</div>'
+    + '<div class="cm-why"><b>Why these restaurants:</b> comparables are matched on exactly two things \u2014 operating in this same ZIP code, and sharing this item\u2019s food category ('+(r.compSalesCategory||it.category)+'). It is not a taste, price, or quality simulation, and it is not the basis for creating this item \u2014 it is directional evidence that this category already has real local demand.</div>'
+    + tbl(['Field','Detail'],[
+    ['Named Comparables', (r.comp1||it.comp1)+' &amp; '+(r.comp2||it.comp2)],
+    ['# Sharing This Category in ZIP', String(r.compCount||it.compCount)],
+    ['Price Tier Match', r.compPriceTierMatch || it.priceBand],
+    ['Category Presence Locally', r.compCategoryPresence || '\u2014'],
+    ['Evidence Strength', (r.compEvidenceStrength||it.compEvidenceStrength||'').split(' -- ')[0]],
+    ['Menu Evidence', r.compMenuEvidence||it.compMenuEvidence]
+  ])+'</div>';
+
+  html += '<div class="cm-section"><div class="cm-section-title">Market, Health &amp; Trend Reads</div>'+tbl(['Read','Note'],[
+    ['Health / Nutrition', it.healthFit],
+    ['Customer Sentiment', it.sentimentFit],
+    ['Local Trend', it.trendFit],
+    ['Residential / Business Context', it.residentialNote]
+  ])+'</div>';
+
+  html += '<div class="cm-section"><div class="cm-section-title">Fit Across Segments</div>'+tbl(['Segment','Fit'],[
+    ['Value', it.familyFit], ['Premium', it.premiumFit], ['Premium-Adjacent Upgrade Path', it.premiumAdjacentFit]
+  ])+'</div>';
+
+  html += '</div><div class="cm-foot"><div class="cm-foot-close">Close</div></div>';
+  renderConceptShell(html);
+}
+
+// ================= ZIP STATS / SEGMENTATION (unchanged logic) =================
+function renderZipStats(){
+  const grid = document.getElementById('zipStatsGrid');
+  grid.innerHTML = zipStats.map((s)=>{
+    const t = s.label.replace(/'/g, "&#39;");
+    const b = s.evidence;
+    return '<div class="card stat-card reveal" onclick="openEvidence(\''+t+'\', `'+b+'`)">'
+      + '<div class="info-btn">i</div>'
+      + '<div class="stat-label">'+s.label+'</div>'
+      + '<div class="stat-value">'+s.value+'</div>'
+      + '<div class="stat-sub">'+s.sub+'</div>'
+      + '</div>';
+  }).join('');
+}
+
+function renderDonut(){
+  const segs = [
+    {name:'Value', pct:67.78, color:'#2F5D4A', evidence:'Households in the Income &lt; $25K and $25K&ndash;$49K brackets: (4,354 + 2,441) &divide; 10,025 total households = 67.78%. This is real income-bracket data from the source file, not an estimate.'},
+    {name:'Premium', pct:24.68, color:'#C9973B', evidence:'Households in the $50K&ndash;$74K and $75K&ndash;$99K brackets: (1,767 + 707) &divide; 10,025 total households = 24.68%. Real income-bracket data.'},
+    {name:'Premium Edge', pct:7.54, color:'#6E1423', evidence:'Households in the $100K&ndash;$149K and $150K+ brackets: (451 + 305) &divide; 10,025 total households = 7.54%. Real income-bracket data &mdash; the smallest, highest-income segment in this ZIP.'},
+  ];
+  const circumference = 2 * Math.PI * 88;
+  let offsetAcc = 0;
+  const g = document.getElementById('donutSegments');
+  g.innerHTML = segs.map(s=>{
+    const len = (s.pct/100) * circumference;
+    const dash = len+' '+(circumference - len);
+    const rotate = (offsetAcc/100) * 360;
+    offsetAcc += s.pct;
+    return '<circle r="88" fill="none" stroke="'+s.color+'" stroke-width="30" stroke-dasharray="'+dash+'" transform="rotate('+rotate+')" style="cursor:pointer;" onclick="openEvidence(\''+s.name+' Segment \\u2014 '+s.pct+'%\', `'+s.evidence+'`)"></circle>';
+  }).join('');
+
+  const legend = document.getElementById('segLegend');
+  legend.innerHTML = segs.map(s=>{
+    return '<div class="seg-row" onclick="openEvidence(\''+s.name+' Segment \\u2014 '+s.pct+'%\', `'+s.evidence+'`)">'
+      + '<div class="seg-swatch" style="background:'+s.color+';"></div>'
+      + '<div class="seg-name">'+s.name+'</div>'
+      + '<div class="seg-pct">'+s.pct+'%</div>'
+      + '<div class="info-dot">i</div>'
+      + '</div>';
+  }).join('');
+}
+
+function confDots(score){
+  let out = '';
+  for(let i=1;i<=5;i++){ out += '<i class="'+(i<=score?'on':'')+'"></i>'; }
+  return out;
+}
+
+function renderMenu(){
+  const grid = document.getElementById('menuGrid');
+  grid.innerHTML = ITEMS.map((it,idx)=>{
+    return '<div class="menu-card reveal" onclick="openMenuItem('+idx+')">'
+      + '<div class="mc-top">'
+      + '<div class="mc-badges">'
+      + '<span class="badge '+badgeClass(it.priceBand)+'">'+it.priceBand+' &middot; '+it.segWeekday+'%/'+it.segWeekend+'%</span>'
+      + '<span class="badge" style="background:#F1EAD9; color:#6B6560;">'+it.category+'</span>'
+      + '</div>'
+      + '<h3>'+it.name+'</h3>'
+      + '<div class="mc-cat">'+it.ingredients.split(',').slice(0,2).join(', ')+'</div>'
+      + '<div class="mc-price">$'+it.price.toFixed(2)+'</div>'
+      + '</div>'
+      + '<div class="mc-body">'
+      + '<div class="mc-desc">'+it.description+'</div>'
+      + '<div class="mc-row"><span class="lbl">Confidence</span><span class="conf-dots">'+confDots(it.confidence)+'</span></div>'
+      + '<div class="mc-row"><span class="lbl">Profitability</span><span class="mono">'+it.profitPct+'%</span></div>'
+      + '<div class="mc-row"><span class="lbl">Delivery Fit</span><span>'+it.delivery+'</span></div>'
+      + '<div class="mc-cta">Tap to see why we recommend this &rarr;</div>'
+      + '</div></div>';
+  }).join('');
+}
+
+// ================= OCCASION PRIORITIZATION =================
+const occasionMap = [
+  {title:'Lunch &amp; Dinner &mdash; Everyday Orders', icon:'\u2600', itemIdx:[0,1,3,4]},
+  {title:'Dinner &amp; Weekend Evening &mdash; Specialty Orders', icon:'\u263E', itemIdx:[2]},
+  {title:'Weekend Dine-In / Pickup &mdash; Occasion Items', icon:'\u2605', itemIdx:[5,6]}
+];
+
+function renderOccasions(){
+  const wrap = document.getElementById('occasionGroups');
+  wrap.innerHTML = occasionMap.map(group=>{
+    const cards = group.itemIdx.map(i=>{
+      const it = ITEMS[i];
+      return '<div class="priority-card" onclick="openMenuItem('+i+')" style="cursor:pointer;">'
+        + '<div><div class="pc-name">'+it.name+'</div>'
+        + '<div class="pc-price">$'+it.price.toFixed(2)+' &middot; '+it.priceBand+' ('+it.segWeekday+'% WD / '+it.segWeekend+'% WE) &middot; Delivery: '+it.delivery+'</div></div>'
+        + '<div class="pc-reason"><strong>Weekday:</strong> '+it.weekdayRole+' <br><strong>Weekend:</strong> '+it.weekendRole+'</div>'
+        + '</div>';
+    }).join('');
+    return '<div class="occasion-group reveal">'
+      + '<div class="occasion-head"><div class="oc-icon">'+group.icon+'</div>'
+      + '<div><h3>'+group.title+'</h3><div class="oc-count">'+group.itemIdx.length+' item'+(group.itemIdx.length>1?'s':'')+'</div></div></div>'
+      + cards + '</div>';
+  }).join('');
+}
+
+// ================= NEW: MENU PROFITABILITY CARDS (Section 04) =================
+function renderMenuProfitCards(){
+  const t = menuProfitTotals();
+  const grid = document.getElementById('menuProfitGrid');
+  const cards = [
+    {period:'3', label:'Total Menu Gross Profit', val: moneyExact(t.g), sub:'sum of 7 items, per unit sold today', badge:'Starting Point', cls:'neutral'},
+    {period:'3', label:'3-Month Profitability Value', val: moneyExact(t.p3), sub:'projected, all 7 items', badge:'\u00d71.9 from Gross Profit', cls:'neutral'},
+    {period:'6', label:'6-Month Profitability Value', val: moneyExact(t.p6), sub:'projected, all 7 items', badge:'\u00d71.9 from 3-Month', cls:'neutral'},
+    {period:'9', label:'9-Month Profitability Value', val: moneyExact(t.p9), sub:'projected, all 7 items', badge:'\u00d71.9 from 6-Month', cls:'pos'}
+  ];
+  grid.innerHTML = cards.map(c=>
+    '<div class="msect-kpi-card" onclick="openMenuProfitConcept(\''+c.period+'\')">'
+    + '<span class="mk-label">'+c.label+'</span><div class="mk-val">'+c.val+'</div>'
+    + '<span class="mk-sub">'+c.sub+'</span><span class="mk-badge '+c.cls+'">'+c.badge+'</span></div>'
+  ).join('');
+}
+
+function renderProfitByItemTable(){
+  const sorted = ITEMS.map((it,idx)=>({it,idx})).sort((a,b)=>b.it.profitPct-a.it.profitPct);
+  const rows = sorted.map(({it,idx})=>
+    '<tr onclick="openItemProfitConcept('+idx+')" style="cursor:pointer;">'
+    + '<td class="rt-item">'+it.name+'</td><td>'+it.category+'</td>'
+    + '<td class="rt-num">'+moneyExact(it.price)+'</td><td class="rt-num">'+moneyExact(it.theoreticalCost)+'</td>'
+    + '<td class="rt-num">'+moneyExact(it.profitDollar)+'</td><td class="rt-num">'+it.profitPct+'%</td>'
+    + '<td class="rt-num">'+moneyExact(it.proj3)+'</td><td class="rt-num">'+moneyExact(it.proj6)+'</td><td class="rt-num">'+moneyExact(it.proj9)+'</td></tr>'
+  ).join('');
+  document.getElementById('profitByItemTable').innerHTML =
+    '<thead><tr><th>Item</th><th>Category</th><th>Price</th><th>Theo. Cost</th><th>Gross Profit</th><th>Profitability %</th><th>3-Mo Profit</th><th>6-Mo Profit</th><th>9-Mo Profit</th></tr></thead><tbody>'+rows+'</tbody>';
+}
+
+// ================= NEW: ETHNICITY SECTION (Section 06) =================
+function renderEthnicBars(){
+  const wrap = document.getElementById('ethnicBars');
+  const max = Math.max(...ETHNICITY.ethnicity.map(e=>e.pct));
+  wrap.innerHTML = ETHNICITY.ethnicity.map(e=>{
+    const w = Math.max(2, (e.pct/max)*100);
+    return '<div class="ethnic-bar-row"><div class="eb-top"><strong>'+e.name+'</strong><span class="pct">'+e.pct+'%</span></div>'
+      + '<div class="bar-track"><div class="bar-fill" style="width:'+w+'%; background:var(--burgundy);"></div></div>'
+      + '<div class="eb-sub">'+e.count+' residents'+(e.note?' \u2014 '+e.note:'')+'</div></div>';
+  }).join('');
+}
+
+// ================= NEW: REVENUE SECTION (Section 07) =================
+function renderRevenueCards(){
+  const t = revenueTotals();
+  const grid = document.getElementById('revenueCardGrid');
+  grid.innerHTML = `
+    <div class="rev-card cur6" onclick="openRevenueConcept('first6')">
+      <div class="rc-period">Current 6-Month Revenue</div>
+      <div class="rc-value">${money(t.first6)}</div>
+      <div class="rc-sub">Months 1&ndash;6 &middot; all 7 items, ramp-up included</div>
+      <div class="rc-tap">Tap for full calculation &rarr;</div>
+    </div>
+    <div class="rev-card next6" onclick="openRevenueConcept('next6')">
+      <div class="rc-period">Next 6-Month Revenue</div>
+      <div class="rc-value">${money(t.next6)}</div>
+      <div class="rc-sub">Months 7&ndash;12 &middot; fully ramped up</div>
+      <div class="rc-tap">Tap for full calculation &rarr;</div>
+    </div>
+    <div class="rev-card next9" onclick="openRevenueConcept('next9')">
+      <div class="rc-period">Next 9-Month Revenue</div>
+      <div class="rc-value">${money(t.next9)}</div>
+      <div class="rc-sub">Months 13&ndash;21</div>
+      <div class="rc-tap">Tap for full calculation &rarr;</div>
+    </div>`;
+}
+
+function renderRevenueOverviewTable(){
+  const rows = ITEMS.map((it,idx)=>{
+    const r = REVMAP[it.name];
+    const totalUnits = r.units6m + r.unitsNext6m + r.unitsNext9m;
+    return '<tr onclick="openItemRevenueConcept('+idx+')" style="cursor:pointer;">'
+      + '<td class="rt-item">'+it.name+'</td><td>'+it.category+'</td>'
+      + '<td>'+r.comp1+' &amp; '+r.comp2+'</td>'
+      + '<td class="rt-num">'+moneyExact(it.price)+'</td>'
+      + '<td class="rt-num">'+money(r.rev6m)+'</td>'
+      + '<td class="rt-num">'+money(r.revNext6m)+'</td>'
+      + '<td class="rt-num">'+money(r.revNext9m)+'</td>'
+      + '<td class="rt-num">'+Math.round(totalUnits).toLocaleString('en-US')+'</td>'
+      + '<td style="font-size:12px; color:var(--text-soft);">Same ZIP &amp; same category ('+(r.compSalesCategory||it.category)+') as '+r.comp1+' &amp; '+r.comp2+' &mdash; '+r.compCount+' total restaurants share this category locally.</td></tr>';
+  }).join('');
+  document.getElementById('revenueOverviewTable').innerHTML =
+    '<thead><tr><th>New Menu Item</th><th>Category</th><th>Comparable Restaurants</th><th>Price</th><th>Current 6-Mo Rev.</th><th>Next 6-Mo Rev.</th><th>Next 9-Mo Rev.</th><th>Units Sold (21-Mo Total)</th><th>Why This Comparable</th></tr></thead><tbody>'+rows+'</tbody>';
+}
+
+// ================= SCROLL EFFECTS =================
+function initScrollEffects(){
+  const navbar = document.getElementById('navbar');
+  const scrollBtn = document.getElementById('scrollTopBtn');
+  window.addEventListener('scroll', ()=>{
+    navbar.classList.toggle('scrolled', window.scrollY > 20);
+    scrollBtn.classList.toggle('show', window.scrollY > 500);
+
+    let current = '';
+    document.querySelectorAll('.section, header').forEach(sec=>{
+      const top = sec.offsetTop - 140;
+      if(window.scrollY >= top) current = sec.getAttribute('id');
+    });
+    document.querySelectorAll('.nav-links a').forEach(a=>{
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  });
+
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('show'); } });
+  }, {threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+}
+
+// ================= INIT =================
+renderZipStats();
+renderDonut();
+renderMenuProfitCards();
+renderProfitByItemTable();
+renderEthnicBars();
+renderRevenueCards();
+renderRevenueOverviewTable();
+renderMenu();
+renderOccasions();
+initScrollEffects();
+
+setTimeout(()=>{
+  const io2 = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('show'); } });
+  }, {threshold:0.1});
+  document.querySelectorAll('.reveal:not(.show)').forEach(el=>io2.observe(el));
+}, 50);
+
+</script>
+</body>
+</html>
